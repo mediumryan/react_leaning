@@ -1,0 +1,156 @@
+import { useEffect, useState } from 'react';
+import type { Authority, Course, Grade, User } from '~/data/userData';
+import {
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from './ui/dialog';
+import { Label } from './ui/label';
+import { Input } from './ui/input';
+import { Button } from './ui/button';
+
+interface UserFormProps {
+  user?: User;
+  onSave: (user: User) => void;
+  setOpen?: (open: boolean) => void;
+}
+
+function UserForm({ user, onSave, setOpen }: UserFormProps) {
+  const [name, setName] = useState(user?.name ?? '');
+  const [nickname, setNickname] = useState(user?.nickname ?? '');
+  const [email, setEmail] = useState(user?.email ?? '');
+  const [course, setCourse] = useState<Course>(user?.course ?? 'beginner');
+  const [grade, setGrade] = useState<Grade>(user?.grade ?? 'Bronze');
+  const [authority, setAuthority] = useState<Authority>(
+    user?.authority ?? 'user',
+  );
+  const [exp, setExp] = useState<number>(user?.exp ?? 0);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave({
+      id: user?.id ?? Date.now(),
+      name,
+      nickname,
+      email,
+      course,
+      grade,
+      authority,
+      exp,
+    });
+
+    setOpen?.(false);
+  };
+
+  return (
+    <DialogContent className="sm:max-w-120">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <DialogHeader>
+          <DialogTitle>{user ? 'Edit User' : 'Add User'}</DialogTitle>
+          <DialogDescription>
+            {user ? 'Update user information.' : 'Create a new user account.'}
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="name">Name</Label>
+            <Input
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="nickname">Nickname</Label>
+            <Input
+              id="nickname"
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value)}
+              required
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="course">Course</Label>
+          <select
+            id="course"
+            className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm"
+            value={course}
+            onChange={(e) => setCourse(e.target.value as Course)}
+          >
+            <option value="beginner">Beginner</option>
+            <option value="intermediate">Intermediate</option>
+            <option value="advanced">Advanced</option>
+          </select>
+        </div>
+
+        <div className="grid grid-cols-3 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="grade">Grade</Label>
+            <select
+              id="grade"
+              className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm"
+              value={grade}
+              onChange={(e) => setGrade(e.target.value as Grade)}
+            >
+              <option value="Bronze">Bronze</option>
+              <option value="Silver">Silver</option>
+              <option value="Gold">Gold</option>
+              <option value="Platinum">Platinum</option>
+              <option value="Diamond">Diamond</option>
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="authority">Authority</Label>
+            <select
+              id="authority"
+              className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm"
+              value={authority}
+              onChange={(e) => setAuthority(e.target.value as Authority)}
+            >
+              <option value="user">User</option>
+              <option value="operator">Operator</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="exp">EXP</Label>
+            <Input
+              id="exp"
+              type="number"
+              min={0}
+              value={exp}
+              onChange={(e) => setExp(Number(e.target.value))}
+              required
+            />
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button type="submit">Save</Button>
+        </DialogFooter>
+      </form>
+    </DialogContent>
+  );
+}
+
+export default UserForm;
