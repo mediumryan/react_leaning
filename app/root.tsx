@@ -6,10 +6,15 @@ import {
   Scripts,
   ScrollRestoration,
 } from 'react-router';
-
+import { useEffect } from 'react';
 import type { Route } from './+types/root';
 import './app.css';
-import { HeaderMenu } from './components/header-menu';
+import { HeaderMenu } from './components/HeaderMenu';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { currentUserAtom } from './data/userData';
+import { onAuthChange } from './lib/auth';
+import { contentsAtom } from './data/contentData';
+import { getUserProfile, getContents } from './lib/firestore_utils'; // Import getContents
 
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -43,9 +48,40 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  const [currentUser, setCurrentUser] = useAtom(currentUserAtom);
+  const [contents, setContents] = useAtom(contentsAtom);
+
+  useEffect(() => {
+    const unsubscribe = onAuthChange(async (firebaseUser) => {
+      if (firebaseUser) {
+        // User is logged in
+        // 1. Fetch user profile
+        const userProfile = await getUserProfile(firebaseUser.uid);
+        setCurrentUser(userProfile);
+
+        // 2. Fetch contents if not already in state (from sessionStorage)
+        if (!contents) {
+          console.log('Fetching contents from Firestore...');
+          const contentsData = await getContents();
+          setContents(contentsData);
+          console.log('Contents set from Firestore.');
+        } else {
+          console.log('Contents already in state (from localStorage).');
+        }
+      } else {
+        // User is logged out
+        setCurrentUser(null);
+        setContents(null); // Clear contents on logout
+      }
+    });
+
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
+  }, [setCurrentUser, contents, setContents]);
+
   return (
     <div className="relative">
-      <HeaderMenu />
+      {currentUser && <HeaderMenu />}
       <Outlet />
     </div>
   );

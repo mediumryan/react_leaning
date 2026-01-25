@@ -14,14 +14,18 @@ import {
 } from '~/components/ui/table';
 import { Badge } from '~/components/ui/badge';
 import { useState } from 'react';
-import { INITIAL_USERS, type User } from '~/data/userData';
+import { currentUserAtom, type User } from '~/data/userData';
 import UserForm from '~/components/UserForm';
+import { useAtom, useAtomValue } from 'jotai';
+import { Navigate } from 'react-router';
 
 export default function UserManagementPage() {
   const [openAdd, setOpenAdd] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
 
-  const [users, setUsers] = useState<User[]>(INITIAL_USERS);
+  const currentUser = useAtomValue(currentUserAtom);
+
+  const [users, setUsers] = useAtom(usersAtom);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [search, setSearch] = useState('');
 
@@ -51,6 +55,10 @@ export default function UserManagementPage() {
     setOpenAdd(false);
     setOpenEdit(false);
   };
+
+  if (!currentUser) {
+    return <Navigate to="/login" replace />;
+  }
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">

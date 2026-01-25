@@ -5,3 +5,4 @@
 # React Router
 /.react-router/
 /build/
+\n# Firebase env file\n.env

@@ -1,29 +1,24 @@
 import { useEffect, useState } from 'react';
 import { Card } from './ui/card';
-import { CONTENT_DATA } from '~/data/data';
+import { useAtomValue } from 'jotai';
+import { contentsAtom } from '~/data/contentData';
 
 interface ContentsProps {
   lectureId: string | undefined;
 }
 
 export default function Contents({ lectureId }: ContentsProps) {
-  const data = CONTENT_DATA;
+  const contents = useAtomValue(contentsAtom);
 
   const [currentContent, setCurrentContent] = useState('');
 
   useEffect(() => {
-    // CONTENT_DATA에서 course가 lectureId인 항목의 content을 찾아 currentContent에 설정
-    if (isNaN(Number(lectureId))) return;
-    for (const section of data) {
-      const found = section.sub_contents.find(
-        (item) => item.course === Number(lectureId),
-      );
-      if (found) {
-        setCurrentContent(found.content);
-        break;
-      }
+    if (!lectureId || !contents) return;
+    const foundContent = contents.find((item) => item.id === lectureId);
+    if (foundContent) {
+      setCurrentContent(foundContent.content);
     }
-  }, [lectureId]);
+  }, [lectureId, contents]);
 
   return (
     <Card className="p-8 z-0">{currentContent ?? 'No content available'}</Card>

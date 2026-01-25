@@ -1,15 +1,15 @@
-import { useEffect, useState } from 'react';
-import type { Authority, Course, Grade, User } from '~/data/userData';
+import { useState } from "react";
+import type { Authority, Course, Grade, User } from "~/data/userData";
 import {
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from './ui/dialog';
-import { Label } from './ui/label';
-import { Input } from './ui/input';
-import { Button } from './ui/button';
+} from "./ui/dialog";
+import { Label } from "./ui/label";
+import { Input } from "./ui/input";
+import { Button } from "./ui/button";
 
 interface UserFormProps {
   user?: User;
@@ -18,13 +18,13 @@ interface UserFormProps {
 }
 
 function UserForm({ user, onSave, setOpen }: UserFormProps) {
-  const [name, setName] = useState(user?.name ?? '');
-  const [nickname, setNickname] = useState(user?.nickname ?? '');
-  const [email, setEmail] = useState(user?.email ?? '');
-  const [course, setCourse] = useState<Course>(user?.course ?? 'beginner');
-  const [grade, setGrade] = useState<Grade>(user?.grade ?? 'Bronze');
+  const [name, setName] = useState(user?.name ?? "");
+  const [nickname, setNickname] = useState(user?.nickname ?? "");
+  const [email, setEmail] = useState(user?.email ?? "");
+  const [course, setCourse] = useState<Course>(user?.course ?? "Beginner");
+  const [grade, setGrade] = useState<Grade>(user?.grade ?? "Bronze");
   const [authority, setAuthority] = useState<Authority>(
-    user?.authority ?? 'user',
+    user?.authority ?? "user",
   );
   const [exp, setExp] = useState<number>(user?.exp ?? 0);
 
@@ -35,6 +35,7 @@ function UserForm({ user, onSave, setOpen }: UserFormProps) {
       name,
       nickname,
       email,
+      password: user?.password ?? "123",
       course,
       grade,
       authority,
@@ -48,9 +49,9 @@ function UserForm({ user, onSave, setOpen }: UserFormProps) {
     <DialogContent className="sm:max-w-120">
       <form onSubmit={handleSubmit} className="space-y-4">
         <DialogHeader>
-          <DialogTitle>{user ? 'Edit User' : 'Add User'}</DialogTitle>
+          <DialogTitle>{user ? "Edit User" : "Add User"}</DialogTitle>
           <DialogDescription>
-            {user ? 'Update user information.' : 'Create a new user account.'}
+            {user ? "Update user information." : "Create a new user account."}
           </DialogDescription>
         </DialogHeader>
 
@@ -95,9 +96,9 @@ function UserForm({ user, onSave, setOpen }: UserFormProps) {
             value={course}
             onChange={(e) => setCourse(e.target.value as Course)}
           >
-            <option value="beginner">Beginner</option>
-            <option value="intermediate">Intermediate</option>
-            <option value="advanced">Advanced</option>
+            <option value="Beginner">Beginner</option>
+            <option value="Intermediate">Intermediate</option>
+            <option value="Advanced">Advanced</option>
           </select>
         </div>
 

@@ -1,4 +1,3 @@
-import React from 'react';
 import { ButtonGroup } from './ui/button-group';
 import { Button } from './ui/button';
 import {
@@ -9,43 +8,70 @@ import {
   ChevronsRight,
 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router';
-import { useAtom } from 'jotai';
-import { contentStatusAtom } from '~/data/data';
+import {
+  getFirstContentId,
+  getLastContentId,
+  getNextContentId,
+  getPreviousContentId,
+} from '~/helper/helper';
+import { currentUserAtom } from '~/data/userData'; // Import contentsAtom
+import { useAtom, useAtomValue } from 'jotai'; // Import useAtomValue
+import { contentsAtom } from '~/data/contentData';
 
 export default function ContentFooter() {
   const lectureId = useParams().id;
   const navigate = useNavigate();
 
-  const [contentStatus, setContentStatus] = useAtom(contentStatusAtom);
+  const [currentUser, setCurrentUser] = useAtom(currentUserAtom);
+  const contents = useAtomValue(contentsAtom); // Get contents from atom
+
+  // If contents are not loaded yet, disable buttons or return null
+  if (!contents) {
+    return null; // Or render a disabled state for buttons
+  }
 
   const handleClickFirst = () => {
-    navigate('/contents/1');
+    const firstContentId = getFirstContentId(contents);
+    if (firstContentId) navigate(`/contents/${firstContentId}`);
   };
 
-  const handleClickBack = () => {
-    navigate(`/contents/${Number(lectureId) - 1}`);
+  const handleClickPrevious = () => {
+    const prevContentId = getPreviousContentId(contents, lectureId ?? '');
+    if (prevContentId) navigate(`/contents/${prevContentId}`);
   };
 
-  const handleClickForward = () => {
-    navigate(`/contents/${Number(lectureId) + 1}`);
+  const handleClickNext = () => {
+    const nextContentId = getNextContentId(contents, lectureId ?? '');
+    if (nextContentId) navigate(`/contents/${nextContentId}`);
   };
 
   const handleClickLast = () => {
-    navigate(`/contents/${contentStatus.length}`);
+    const lastContentId = getLastContentId(contents);
+    if (lastContentId) navigate(`/contents/${lastContentId}`);
   };
 
   const handleClickComplete = () => {
-    setContentStatus((prev) => {
-      let updated = [...prev];
-      const index = updated.findIndex(
-        (item) => item.course === Number(lectureId),
-      );
-      if (index !== -1) {
-        updated[index] = { ...updated[index], isComplete: true };
+    if (!currentUser || !lectureId) return;
+    // 현재 유저의 contentStatus를 확인. lectureId와 일치하는 항목이 있으면 isComplete를 true로 설정
+    const updatedContentStatus = currentUser?.contentStatus?.map((status) => {
+      if (status.course === lectureId) {
+        return { ...status, isComplete: true };
       }
-      return updated;
+      return status;
     });
+    setCurrentUser({
+      ...currentUser,
+      contentStatus: updatedContentStatus,
+    });
+    alert('このレクチャーを完了しました！');
   };
+
+  const isCompleted = currentUser?.contentStatus?.find(
+    (status) => status.course === lectureId,
+  )?.isComplete;
+
+  const hasPrevious = !!getPreviousContentId(contents, lectureId ?? '');
+  const hasNext = !!getNextContentId(contents, lectureId ?? '');
 
   return (
     <ButtonGroup>
@@ -53,8 +79,8 @@ export default function ContentFooter() {
         <Button
           variant="outline"
           size="icon"
-          aria-label="Go Back"
-          disabled={Number(lectureId) <= 1}
+          aria-label="Go First"
+          disabled={!hasPrevious}
           onClick={handleClickFirst}
         >
           <ChevronsLeft />
@@ -62,9 +88,9 @@ export default function ContentFooter() {
         <Button
           variant="outline"
           size="icon"
-          aria-label="Go Back"
-          disabled={Number(lectureId) <= 1}
-          onClick={handleClickBack}
+          aria-label="Go Previous"
+          disabled={!hasPrevious}
+          onClick={handleClickPrevious}
         >
           <ChevronLeft />
         </Button>
@@ -73,19 +99,16 @@ export default function ContentFooter() {
           size="icon"
           aria-label="Complete"
           onClick={handleClickComplete}
-          disabled={
-            contentStatus.find((item) => item.course === Number(lectureId))
-              ?.isComplete
-          }
+          disabled={isCompleted}
         >
           <Check />
         </Button>
         <Button
           variant="outline"
           size="icon"
-          aria-label="Go Forward"
-          disabled={Number(lectureId) >= contentStatus.length}
-          onClick={handleClickForward}
+          aria-label="Go Next"
+          disabled={!hasNext}
+          onClick={handleClickNext}
         >
           <ChevronRight />
         </Button>
@@ -93,7 +116,7 @@ export default function ContentFooter() {
           variant="outline"
           size="icon"
           aria-label="Go Forward"
-          disabled={Number(lectureId) >= contentStatus.length}
+          disabled={!hasNext}
           onClick={handleClickLast}
         >
           <ChevronsRight />

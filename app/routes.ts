@@ -6,4 +6,6 @@ export default [
   route('community', 'routes/community.tsx'),
   route('settings', 'routes/settings.tsx'),
   route('users', 'routes/users.tsx'),
+  route('login', 'routes/login.tsx'),
+  route('signup', 'routes/signup.tsx'),
 ] satisfies RouteConfig;
