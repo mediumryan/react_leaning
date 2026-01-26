@@ -1,73 +1,46 @@
-// components/PostForm.tsx
-import { useState } from "react";
-import { useAtom } from "jotai";
-import { nanoid } from "nanoid";
-
+// react
+import { useState } from 'react';
+// types
+import type { PostType } from '~/data/postData';
 // shadcn/ui
-import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { Textarea } from "~/components/ui/textarea";
-import { Label } from "~/components/ui/label";
-import { postAtom } from "~/data/postData";
+import { Button } from '~/components/ui/button';
+import { Input } from '~/components/ui/input';
+import { Textarea } from '~/components/ui/textarea';
+import { Label } from '~/components/ui/label';
+// helpers
+import { confirm } from '~/helper/confirm';
 
 interface PostFormProps {
-  editPost: {
-    id: string;
-    title: string;
-    content: string;
-    projectLink?: string;
-    imageUrl?: string;
-  } | null;
+  editPost: PostType | null;
   onClose: () => void;
+  onSave: (
+    post: Omit<PostType, 'id' | 'createdAt' | 'like' | 'likedUsers'>,
+  ) => void;
 }
 
-export default function PostForm({ editPost, onClose }: PostFormProps) {
-  const [posts, setPosts] = useAtom(postAtom);
+export default function PostForm({ editPost, onClose, onSave }: PostFormProps) {
+  const [title, setTitle] = useState(editPost?.title || '');
+  const [content, setContent] = useState(editPost?.content || '');
+  const [projectLink, setProjectLink] = useState(editPost?.projectLink || '');
+  const [imageUrl, setImageUrl] = useState(editPost?.imageUrl || '');
 
-  const [title, setTitle] = useState(editPost?.title || "");
-  const [content, setContent] = useState(editPost?.content || "");
-  const [projectLink, setProjectLink] = useState(editPost?.projectLink || "");
-  const [imageUrl, setImageUrl] = useState(editPost?.imageUrl || "");
-
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!title.trim()) {
-      alert("제목을 입력해주세요!");
+      await confirm({
+        icon: 0,
+        message: 'タイトルを入力してください。',
+        size: 'sm',
+      });
       return;
     }
 
-    if (editPost) {
-      // 수정
-      setPosts(
-        posts.map((p) =>
-          p.id === editPost.id
-            ? {
-                ...p,
-                title,
-                content,
-                projectLink,
-                imageUrl,
-                name: "Anonymous",
-                createdAt: new Date(),
-              }
-            : p,
-        ),
-      );
-    } else {
-      // 추가
-      setPosts([
-        {
-          id: nanoid(),
-          title,
-          content,
-          projectLink,
-          imageUrl,
-          like: 0,
-          name: "Anonymous",
-          createdAt: new Date(),
-        },
-        ...posts,
-      ]);
-    }
+    onSave({
+      title,
+      content,
+      projectLink,
+      imageUrl,
+      name: 'Anonymous', // or get from auth
+    });
 
     onClose();
   };
@@ -124,7 +97,7 @@ export default function PostForm({ editPost, onClose }: PostFormProps) {
         <Button variant="outline" onClick={onClose}>
           취소
         </Button>
-        <Button onClick={handleSave}>{editPost ? "수정" : "저장"}</Button>
+        <Button onClick={handleSave}>{editPost ? '수정' : '저장'}</Button>
       </div>
     </div>
   );

@@ -1,3 +1,6 @@
+// react
+import { useEffect } from 'react';
+// react-router
 import {
   isRouteErrorResponse,
   Links,
@@ -6,15 +9,19 @@ import {
   Scripts,
   ScrollRestoration,
 } from 'react-router';
-import { useEffect } from 'react';
 import type { Route } from './+types/root';
+// styles
 import './app.css';
+// components
 import { HeaderMenu } from './components/HeaderMenu';
-import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { CommonAlert } from './components/ConfirmDialog';
+// atoms
+import { useAtom } from 'jotai';
 import { currentUserAtom } from './data/userData';
-import { onAuthChange } from './lib/auth';
 import { contentsAtom } from './data/contentData';
-import { getUserProfile, getContents } from './lib/firestore_utils'; // Import getContents
+// firebase
+import { onAuthChange } from './lib/auth';
+import { getUserProfile, getContents } from './lib/firestore_utils';
 
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -83,6 +90,7 @@ export default function App() {
     <div className="relative">
       {currentUser && <HeaderMenu />}
       <Outlet />
+      <CommonAlert />
     </div>
   );
 }
