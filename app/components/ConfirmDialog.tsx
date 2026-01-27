@@ -1,6 +1,6 @@
 // atoms
-import { useAtom } from 'jotai';
-import { confirmAtom } from '~/data/confirmData';
+import { useAtom } from "jotai";
+import { confirmAtom } from "~/data/confirmData";
 // shadcn/ui
 import {
   AlertDialog,
@@ -11,9 +11,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from './ui/alert-dialog';
+} from "./ui/alert-dialog";
 // icons
-import { Ban, Info, TriangleAlert } from 'lucide-react';
+import { Ban, Info, TriangleAlert } from "lucide-react";
 
 export function CommonAlert() {
   const [confirmContent, setConfirmContent] = useAtom(confirmAtom);

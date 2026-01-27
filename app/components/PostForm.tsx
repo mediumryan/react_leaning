@@ -1,35 +1,35 @@
 // react
-import { useState } from 'react';
+import { useState } from "react";
 // types
-import type { PostType } from '~/data/postData';
+import type { PostType } from "~/data/postData";
 // shadcn/ui
-import { Button } from '~/components/ui/button';
-import { Input } from '~/components/ui/input';
-import { Textarea } from '~/components/ui/textarea';
-import { Label } from '~/components/ui/label';
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import { Textarea } from "~/components/ui/textarea";
+import { Label } from "~/components/ui/label";
 // helpers
-import { confirm } from '~/helper/confirm';
+import { confirm } from "~/helper/confirm";
 
 interface PostFormProps {
   editPost: PostType | null;
   onClose: () => void;
   onSave: (
-    post: Omit<PostType, 'id' | 'createdAt' | 'like' | 'likedUsers'>,
+    post: Omit<PostType, "id" | "createdAt" | "like" | "likedUsers">,
   ) => void;
 }
 
 export default function PostForm({ editPost, onClose, onSave }: PostFormProps) {
-  const [title, setTitle] = useState(editPost?.title || '');
-  const [content, setContent] = useState(editPost?.content || '');
-  const [projectLink, setProjectLink] = useState(editPost?.projectLink || '');
-  const [imageUrl, setImageUrl] = useState(editPost?.imageUrl || '');
+  const [title, setTitle] = useState(editPost?.title || "");
+  const [content, setContent] = useState(editPost?.content || "");
+  const [projectLink, setProjectLink] = useState(editPost?.projectLink || "");
+  const [imageUrl, setImageUrl] = useState(editPost?.imageUrl || "");
 
   const handleSave = async () => {
     if (!title.trim()) {
       await confirm({
         icon: 0,
-        message: 'タイトルを入力してください。',
-        size: 'sm',
+        message: "タイトルを入力してください。",
+        size: "sm",
       });
       return;
     }
@@ -39,7 +39,7 @@ export default function PostForm({ editPost, onClose, onSave }: PostFormProps) {
       content,
       projectLink,
       imageUrl,
-      name: 'Anonymous', // or get from auth
+      name: "Anonymous", // or get from auth
     });
 
     onClose();
@@ -97,7 +97,7 @@ export default function PostForm({ editPost, onClose, onSave }: PostFormProps) {
         <Button variant="outline" onClick={onClose}>
           취소
         </Button>
-        <Button onClick={handleSave}>{editPost ? '수정' : '저장'}</Button>
+        <Button onClick={handleSave}>{editPost ? "수정" : "저장"}</Button>
       </div>
     </div>
   );

@@ -6,13 +6,15 @@ import { AppSidebar } from '~/components/Sidebar';
 import ContentFooter from '~/components/ContentFooter';
 import Contents from '~/components/Contents';
 import GoTopButton from '~/components/GoTopButton';
+import { Button } from '~/components/ui/button';
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
 } from '~/components/ui/sidebar';
-import { currentUserAtom } from '~/data/userData';
 import { contentsAtom } from '~/data/contentData';
+import { currentUserAtom } from '~/data/userData';
+import { migrateContentToFirestore } from '~/script/migrateContent';
 
 export default function LectureLayout() {
   const currentUser = useAtomValue(currentUserAtom);
@@ -58,6 +60,10 @@ export default function LectureLayout() {
               <SidebarTrigger />
               <div className="font-semibold">{headerTitle}</div>
             </div>
+            {/* 임시 마이그레이션 버튼 */}
+            <Button onClick={migrateContentToFirestore} variant="outline">
+              Migrate Data
+            </Button>
           </header>
 
           <ScrollArea className="flex-1">

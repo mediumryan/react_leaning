@@ -4,8 +4,11 @@ import {
   signOut,
   onAuthStateChanged,
   type User,
-} from 'firebase/auth';
-import { auth } from './firebase';
+} from "firebase/auth";
+import { auth } from "./firebase";
+import { getDefaultStore } from "jotai";
+import { getUserProfile } from "./firestore_utils";
+import { authLoadingAtom, currentUserAtom } from "~/data/userData";
 
 // 회원가입
 export const signUp = (email: string, password: string) => {
@@ -26,3 +29,22 @@ export const logout = () => {
 export const onAuthChange = (callback: (user: User | null) => void) => {
   return onAuthStateChanged(auth, callback);
 };
+
+const store = getDefaultStore();
+
+let authListenerInitialized = false;
+
+export function initAuthListener() {
+  if (authListenerInitialized) return;
+  authListenerInitialized = true;
+
+  onAuthStateChanged(auth, async (firebaseUser) => {
+    if (firebaseUser) {
+      const profile = await getUserProfile(firebaseUser.uid);
+      store.set(currentUserAtom, profile);
+    } else {
+      store.set(currentUserAtom, null);
+    }
+    store.set(authLoadingAtom, false);
+  });
+}

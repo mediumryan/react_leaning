@@ -1,5 +1,5 @@
 // react
-import { useEffect } from 'react';
+import { useEffect } from "react";
 // react-router
 import {
   isRouteErrorResponse,
@@ -8,31 +8,38 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
-} from 'react-router';
-import type { Route } from './+types/root';
+} from "react-router";
+import type { Route } from "./+types/root";
 // styles
-import './app.css';
+import "./app.css";
 // components
-import { HeaderMenu } from './components/HeaderMenu';
-import { CommonAlert } from './components/ConfirmDialog';
+import { HeaderMenu } from "./components/HeaderMenu";
+import { CommonAlert } from "./components/ConfirmDialog";
+import { BackgroundSpinner } from "./components/BackgroundSpinner";
 // atoms
-import { useAtom } from 'jotai';
-import { currentUserAtom } from './data/userData';
-import { contentsAtom } from './data/contentData';
+import { useAtomValue } from "jotai";
+import { authLoadingAtom, currentUserAtom } from "./data/userData";
 // firebase
-import { onAuthChange } from './lib/auth';
-import { getUserProfile, getContents } from './lib/firestore_utils';
+import { initAuthListener } from "./lib/auth";
 
 export const links: Route.LinksFunction = () => [
-  { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+  { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
-    rel: 'preconnect',
-    href: 'https://fonts.gstatic.com',
-    crossOrigin: 'anonymous',
+    rel: "preconnect",
+    href: "https://fonts.gstatic.com",
+    crossOrigin: "anonymous",
   },
+
+  // Inter
   {
-    rel: 'stylesheet',
-    href: 'https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap',
+    rel: "stylesheet",
+    href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
+  },
+
+  // Google Sans
+  {
+    rel: "stylesheet",
+    href: "https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&display=swap",
   },
 ];
 
@@ -55,36 +62,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  const [currentUser, setCurrentUser] = useAtom(currentUserAtom);
-  const [contents, setContents] = useAtom(contentsAtom);
+  const loading = useAtomValue(authLoadingAtom);
+  const currentUser = useAtomValue(currentUserAtom);
 
   useEffect(() => {
-    const unsubscribe = onAuthChange(async (firebaseUser) => {
-      if (firebaseUser) {
-        // User is logged in
-        // 1. Fetch user profile
-        const userProfile = await getUserProfile(firebaseUser.uid);
-        setCurrentUser(userProfile);
+    initAuthListener();
+  }, []);
 
-        // 2. Fetch contents if not already in state (from sessionStorage)
-        if (!contents) {
-          console.log('Fetching contents from Firestore...');
-          const contentsData = await getContents();
-          setContents(contentsData);
-          console.log('Contents set from Firestore.');
-        } else {
-          console.log('Contents already in state (from localStorage).');
-        }
-      } else {
-        // User is logged out
-        setCurrentUser(null);
-        setContents(null); // Clear contents on logout
-      }
-    });
-
-    // Cleanup subscription on unmount
-    return () => unsubscribe();
-  }, [setCurrentUser, contents, setContents]);
+  if (loading) {
+    return <BackgroundSpinner />;
+  }
 
   return (
     <div className="relative">
@@ -96,15 +83,15 @@ export default function App() {
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
-  let message = 'Oops!';
-  let details = 'An unexpected error occurred.';
+  let message = "Oops!";
+  let details = "An unexpected error occurred.";
   let stack: string | undefined;
 
   if (isRouteErrorResponse(error)) {
-    message = error.status === 404 ? '404' : 'Error';
+    message = error.status === 404 ? "404" : "Error";
     details =
       error.status === 404
-        ? 'The requested page could not be found.'
+        ? "The requested page could not be found."
         : error.statusText || details;
   } else if (import.meta.env.DEV && error && error instanceof Error) {
     details = error.message;

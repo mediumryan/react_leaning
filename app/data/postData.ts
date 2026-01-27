@@ -1,5 +1,7 @@
 import { atom } from 'jotai';
+import { atomWithQuery } from 'jotai-tanstack-query';
 import { getPosts } from './postApi';
+import { currentUserAtom, type User } from './userData';
 
 export type PostType = {
   id: string;
@@ -10,13 +12,29 @@ export type PostType = {
   like: number;
   name: string;
   createdAt: Date;
-  likedUsers: string[];
+  isLiked?: boolean;
 };
 
-export const refetchAtom = atom(0);
+export type PostOrderType = 'new' | 'popular';
 
-export const postsAtom = atom(async (get) => {
-  get(refetchAtom);
-  const posts = await getPosts();
-  return posts;
-});
+export const refetchAtom = atom(0);
+export const postOrderAtom = atom<PostOrderType>('new');
+
+export const postsAtom = atomWithQuery((get) => ({
+  queryKey: [
+    'posts',
+    get(postOrderAtom),
+    get(refetchAtom),
+    get(currentUserAtom),
+  ],
+  queryFn: async ({ queryKey }) => {
+    const [, postOrder, , currentUser] = queryKey as [
+      string,
+      PostOrderType,
+      number,
+      User | null,
+    ];
+    const posts = await getPosts(currentUser?.uid, postOrder);
+    return posts;
+  },
+}));

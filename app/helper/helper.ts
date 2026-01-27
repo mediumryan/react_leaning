@@ -1,5 +1,5 @@
-import type { Content } from '~/data/contentData';
-import type { User } from '~/data/userData';
+import type { Content } from "~/data/contentData";
+import type { User } from "~/data/userData";
 
 export const getFirstContentId = (contentList: Content[]) => {
   if (contentList.length === 0) return null;
@@ -67,17 +67,17 @@ export const groupContentBySection = (contentList: Content[]) => {
 export const mappingTitlebySection = (section: number) => {
   switch (section) {
     case 1:
-      return '1. Reactの基礎';
+      return "1. Reactの基礎";
     case 2:
-      return '2. Reactの基本構文';
+      return "2. Reactの基本構文";
     case 3:
-      return '3. PropsとState';
+      return "3. PropsとState";
     case 4:
-      return '4. イベントとフォーム';
+      return "4. イベントとフォーム";
     case 5:
-      return '5. コンポーネントのライフサイクルとフック';
+      return "5. コンポーネントのライフサイクルとフック";
     default:
-      return '';
+      return "";
   }
 };
 

@@ -11,6 +11,7 @@
 
 html,
 body {
+  font-family: "Google Sans", "Inter", system-ui, sans-serif;
   @apply bg-white dark:bg-gray-950;
 
   @media (prefers-color-scheme: dark) {

@@ -1,66 +1,87 @@
-import { Suspense, useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 // atoms
-import { useAtom, useSetAtom, useAtomValue } from 'jotai';
-import { postsAtom, refetchAtom, type PostType } from '~/data/postData';
+import { useSetAtom, useAtomValue, useAtom } from "jotai";
+import { currentUserAtom } from "~/data/userData";
+import {
+  postOrderAtom,
+  postsAtom,
+  refetchAtom,
+  type PostType,
+} from "~/data/postData";
 // shadcn/ui
-import { Button } from '~/components/ui/button';
+import { Button } from "~/components/ui/button";
 import {
   Card,
   CardHeader,
   CardTitle,
   CardContent,
   CardFooter,
-} from '~/components/ui/card';
+} from "~/components/ui/card";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '~/components/ui/dialog';
-import { ButtonGroup } from '~/components/ui/button-group';
-import { Badge } from '~/components/ui/badge';
+} from "~/components/ui/dialog";
+import { ButtonGroup } from "~/components/ui/button-group";
+import { Badge } from "~/components/ui/badge";
 // icons
-import { HeartIcon, PlusIcon } from 'lucide-react';
+import { HeartIcon, PlusIcon } from "lucide-react";
 // components
-import PostForm from '~/components/PostForm';
+import PostForm from "~/components/PostForm";
+import { BackgroundSpinner } from "~/components/BackgroundSpinner";
 // helpers
-import { confirm } from '~/helper/confirm';
-import { Skeleton } from '~/components/ui/skeleton';
-import { addPost, deletePost, updatePost } from '~/data/postApi';
+import { addPost, deletePost, likePost, updatePost } from "~/data/postApi";
+import { confirm } from "~/helper/confirm";
 
 function Community() {
-  const initialPosts = useAtomValue(postsAtom);
+  const currentUser = useAtomValue(currentUserAtom);
   const setRefetch = useSetAtom(refetchAtom);
   const [posts, setPosts] = useState<PostType[]>([]);
   const [editingPost, setEditingPost] = useState<PostType | null>(null);
   const [showForm, setShowForm] = useState(false);
 
-  const [postOrder, setPostOrder] = useState<'new' | 'popular'>('new');
+  const [postOrder, setPostOrder] = useAtom(postOrderAtom);
+
+  const [{ data: initialPosts, isPending, isError }] = useAtom(postsAtom);
 
   useEffect(() => {
-    if (initialPosts) {
-      setPosts(
-        [...initialPosts].sort(
+    if (!initialPosts) return;
+
+    const sortPosts = async () => {
+      await Promise.resolve();
+
+      let sortedPosts = [...initialPosts];
+
+      if (postOrder === "new") {
+        sortedPosts.sort(
           (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
-        ),
-      );
-    }
-  }, [initialPosts]);
+        );
+      } else if (postOrder === "popular") {
+        sortedPosts.sort((a, b) => b.like - a.like);
+      }
+
+      setPosts(sortedPosts);
+    };
+
+    sortPosts();
+  }, [initialPosts, postOrder]);
 
   const handleDelete = async (id: string) => {
     const ok = await confirm({
       icon: 1,
-      message: '削除しますか？',
-      size: 'sm',
+      message: "削除しますか？",
+      size: "sm",
     });
 
     if (!ok) return;
+
     await deletePost(id);
     setRefetch((c) => c + 1);
   };
 
   const handleSave = async (
-    post: Omit<PostType, 'id' | 'createdAt' | 'like' | 'likedUsers'>,
+    post: Omit<PostType, "id" | "createdAt" | "like" | "likedUsers">,
   ) => {
     if (editingPost) {
       await updatePost(editingPost.id, post);
@@ -70,23 +91,38 @@ function Community() {
     setRefetch((c) => c + 1);
   };
 
-  const handleClickShowNewPost = () => {
-    setPosts(
-      [...posts].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()),
-    );
-    setPostOrder('new');
-  };
-
-  const handleClickShowPopularPost = () => {
-    setPosts([...posts].sort((a, b) => b.like - a.like));
-    setPostOrder('popular');
-  };
-
   const isNewPost = (post: PostType) => {
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
     return post.createdAt >= oneWeekAgo;
   };
+
+  const handleClickLikeButton = async (post: PostType) => {
+    if (!currentUser) return;
+
+    // Optimistic UI update
+    setPosts((prev) =>
+      prev.map((p) =>
+        p.id === post.id
+          ? {
+              ...p,
+              like: p.isLiked ? p.like - 1 : p.like + 1,
+              isLiked: !p.isLiked,
+            }
+          : p,
+      ),
+    );
+
+    try {
+      await likePost(post.id, currentUser.uid);
+    } catch (err) {
+      console.error("Like update failed, reverting:", err);
+      // On error, refetch from the server to get the correct state
+      setRefetch((c) => c + 1);
+    }
+  };
+
+  if (isPending) return <BackgroundSpinner />;
 
   return (
     /* 전체 배경 + 양옆 여백 */
@@ -98,16 +134,14 @@ function Community() {
           <div className="flex justify-between items-center">
             <ButtonGroup className="gap-0.5">
               <Button
-                onClick={handleClickShowNewPost}
-                className={postOrder === 'new' ? 'bg-blue-500 text-white' : ''}
+                onClick={() => setPostOrder("new")}
+                variant={postOrder === "new" ? "default" : "secondary"}
               >
                 最新
               </Button>
               <Button
-                onClick={handleClickShowPopularPost}
-                className={
-                  postOrder === 'popular' ? 'bg-blue-500 text-white' : ''
-                }
+                onClick={() => setPostOrder("popular")}
+                variant={postOrder === "popular" ? "default" : "secondary"}
               >
                 人気
               </Button>
@@ -166,8 +200,12 @@ function Community() {
                   variant="ghost"
                   size="sm"
                   className="flex items-center gap-1"
+                  onClick={() => handleClickLikeButton(post)}
                 >
-                  <HeartIcon className="w-4 h-4" />
+                  <HeartIcon
+                    className="w-4 h-4"
+                    fill={post.isLiked ? "red" : "none"}
+                  />
                   {post.like}
                 </Button>
 
@@ -206,7 +244,7 @@ function Community() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editingPost ? 'ポスト修正' : 'ポスト作成'}
+              {editingPost ? "ポスト修正" : "ポスト作成"}
             </DialogTitle>
           </DialogHeader>
 
@@ -222,17 +260,5 @@ function Community() {
 }
 
 export default function CommunityPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="p-12 flex flex-col gap-4">
-          <Skeleton className="w-full h-40" />
-          <Skeleton className="w-full h-40" />
-          <Skeleton className="w-full h-40" />
-        </div>
-      }
-    >
-      <Community />
-    </Suspense>
-  );
+  return <Community />;
 }

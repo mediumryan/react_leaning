@@ -31,15 +31,15 @@ function UserForm({ user, onSave, setOpen }: UserFormProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave({
-      id: user?.id ?? Date.now(),
+      uid: user?.uid ?? Date.now().toString(),
       name,
       nickname,
       email,
-      password: user?.password ?? "123",
       course,
       grade,
-      authority,
       exp,
+      authority,
+      contentStatus: user?.contentStatus ?? [],
     });
 
     setOpen?.(false);
