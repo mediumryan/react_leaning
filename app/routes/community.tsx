@@ -1,38 +1,41 @@
-import { useEffect, useState } from "react";
+// react
+import { useEffect, useState } from 'react';
+// react-router
+import { Navigate } from 'react-router';
 // atoms
-import { useSetAtom, useAtomValue, useAtom } from "jotai";
-import { currentUserAtom } from "~/data/userData";
+import { useSetAtom, useAtomValue, useAtom } from 'jotai';
+import { currentUserAtom } from '~/data/userData';
 import {
   postOrderAtom,
   postsAtom,
   refetchAtom,
   type PostType,
-} from "~/data/postData";
+} from '~/data/postData';
 // shadcn/ui
-import { Button } from "~/components/ui/button";
+import { Button } from '~/components/ui/button';
 import {
   Card,
   CardHeader,
   CardTitle,
   CardContent,
   CardFooter,
-} from "~/components/ui/card";
+} from '~/components/ui/card';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "~/components/ui/dialog";
-import { ButtonGroup } from "~/components/ui/button-group";
-import { Badge } from "~/components/ui/badge";
+} from '~/components/ui/dialog';
+import { ButtonGroup } from '~/components/ui/button-group';
+import { Badge } from '~/components/ui/badge';
 // icons
-import { HeartIcon, PlusIcon } from "lucide-react";
+import { HeartIcon, PlusIcon } from 'lucide-react';
 // components
-import PostForm from "~/components/PostForm";
-import { BackgroundSpinner } from "~/components/BackgroundSpinner";
+import PostForm from '~/components/PostForm';
+import { BackgroundSpinner } from '~/components/BackgroundSpinner';
 // helpers
-import { addPost, deletePost, likePost, updatePost } from "~/data/postApi";
-import { confirm } from "~/helper/confirm";
+import { addPost, deletePost, likePost, updatePost } from '~/data/postApi';
+import { confirm } from '~/helper/confirm';
 
 function Community() {
   const currentUser = useAtomValue(currentUserAtom);
@@ -53,11 +56,11 @@ function Community() {
 
       let sortedPosts = [...initialPosts];
 
-      if (postOrder === "new") {
+      if (postOrder === 'new') {
         sortedPosts.sort(
           (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
         );
-      } else if (postOrder === "popular") {
+      } else if (postOrder === 'popular') {
         sortedPosts.sort((a, b) => b.like - a.like);
       }
 
@@ -70,8 +73,8 @@ function Community() {
   const handleDelete = async (id: string) => {
     const ok = await confirm({
       icon: 1,
-      message: "削除しますか？",
-      size: "sm",
+      message: '削除しますか？',
+      size: 'sm',
     });
 
     if (!ok) return;
@@ -81,7 +84,7 @@ function Community() {
   };
 
   const handleSave = async (
-    post: Omit<PostType, "id" | "createdAt" | "like" | "likedUsers">,
+    post: Omit<PostType, 'id' | 'createdAt' | 'like' | 'likedUsers'>,
   ) => {
     if (editingPost) {
       await updatePost(editingPost.id, post);
@@ -116,13 +119,17 @@ function Community() {
     try {
       await likePost(post.id, currentUser.uid);
     } catch (err) {
-      console.error("Like update failed, reverting:", err);
+      console.error('Like update failed, reverting:', err);
       // On error, refetch from the server to get the correct state
       setRefetch((c) => c + 1);
     }
   };
 
   if (isPending) return <BackgroundSpinner />;
+
+  if (!currentUser) {
+    return <Navigate to="/login" replace />;
+  }
 
   return (
     /* 전체 배경 + 양옆 여백 */
@@ -134,14 +141,14 @@ function Community() {
           <div className="flex justify-between items-center">
             <ButtonGroup className="gap-0.5">
               <Button
-                onClick={() => setPostOrder("new")}
-                variant={postOrder === "new" ? "default" : "secondary"}
+                onClick={() => setPostOrder('new')}
+                variant={postOrder === 'new' ? 'default' : 'secondary'}
               >
                 最新
               </Button>
               <Button
-                onClick={() => setPostOrder("popular")}
-                variant={postOrder === "popular" ? "default" : "secondary"}
+                onClick={() => setPostOrder('popular')}
+                variant={postOrder === 'popular' ? 'default' : 'secondary'}
               >
                 人気
               </Button>
@@ -204,7 +211,7 @@ function Community() {
                 >
                   <HeartIcon
                     className="w-4 h-4"
-                    fill={post.isLiked ? "red" : "none"}
+                    fill={post.isLiked ? 'red' : 'none'}
                   />
                   {post.like}
                 </Button>
@@ -244,7 +251,7 @@ function Community() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editingPost ? "ポスト修正" : "ポスト作成"}
+              {editingPost ? 'ポスト修正' : 'ポスト作成'}
             </DialogTitle>
           </DialogHeader>
 

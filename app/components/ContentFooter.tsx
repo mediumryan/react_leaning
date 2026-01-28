@@ -1,5 +1,13 @@
+// react-router
+import { useNavigate, useParams } from 'react-router';
+// atoms
+import { currentUserAtom } from '~/data/userData'; // Import contentsAtom
+import { useAtom, useSetAtom } from 'jotai'; // Import useAtomValue
+import { contentsQueryAtom } from '~/data/contentData';
+// shadcn/ui
 import { ButtonGroup } from './ui/button-group';
 import { Button } from './ui/button';
+// icons
 import {
   Check,
   ChevronLeft,
@@ -7,68 +15,107 @@ import {
   ChevronsLeft,
   ChevronsRight,
 } from 'lucide-react';
-import { useNavigate, useParams } from 'react-router';
+// helpers
 import {
   getFirstContentId,
   getLastContentId,
   getNextContentId,
   getPreviousContentId,
 } from '~/helper/helper';
-import { currentUserAtom } from '~/data/userData'; // Import contentsAtom
-import { useAtom, useAtomValue } from 'jotai'; // Import useAtomValue
-import { contentsAtom } from '~/data/contentData';
+import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
+import { firestore } from '~/lib/firebase';
+import {
+  displayedCorrectAnswerAtom,
+  isCorrectAtom,
+  isSubmittedAtom,
+  showFeedbackAtom,
+  userAnswersAtom,
+} from '~/data/quizData';
 
 export default function ContentFooter() {
   const lectureId = useParams().id;
   const navigate = useNavigate();
 
   const [currentUser, setCurrentUser] = useAtom(currentUserAtom);
-  const contents = useAtomValue(contentsAtom); // Get contents from atom
+  const [{ data: contents }] = useAtom(contentsQueryAtom);
 
-  // If contents are not loaded yet, disable buttons or return null
+  const setUserAnswer = useSetAtom(userAnswersAtom);
+  const setIsSubmitted = useSetAtom(isSubmittedAtom);
+  const setIsCorrect = useSetAtom(isCorrectAtom);
+  const setShowFeedback = useSetAtom(showFeedbackAtom);
+  const setDisplayedCorrectAnswer = useSetAtom(displayedCorrectAnswerAtom);
+
   if (!contents) {
     return null; // Or render a disabled state for buttons
   }
 
+  const resetQuizState = () => {
+    setUserAnswer('');
+    setIsSubmitted(false);
+    setIsCorrect(false);
+    setShowFeedback(false);
+    setDisplayedCorrectAnswer('');
+  };
+
   const handleClickFirst = () => {
     const firstContentId = getFirstContentId(contents);
     if (firstContentId) navigate(`/contents/${firstContentId}`);
+    resetQuizState();
   };
 
   const handleClickPrevious = () => {
     const prevContentId = getPreviousContentId(contents, lectureId ?? '');
     if (prevContentId) navigate(`/contents/${prevContentId}`);
+    resetQuizState();
   };
 
   const handleClickNext = () => {
     const nextContentId = getNextContentId(contents, lectureId ?? '');
     if (nextContentId) navigate(`/contents/${nextContentId}`);
+    resetQuizState();
   };
 
   const handleClickLast = () => {
     const lastContentId = getLastContentId(contents);
     if (lastContentId) navigate(`/contents/${lastContentId}`);
+    resetQuizState();
   };
 
-  const handleClickComplete = () => {
+  const handleClickComplete = async () => {
     if (!currentUser || !lectureId) return;
-    // 현재 유저의 contentStatus를 확인. lectureId와 일치하는 항목이 있으면 isComplete를 true로 설정
-    const updatedContentStatus = currentUser?.contentStatus?.map((status) => {
-      if (status.course === lectureId) {
-        return { ...status, isComplete: true };
-      }
-      return status;
-    });
-    setCurrentUser({
-      ...currentUser,
-      contentStatus: updatedContentStatus,
-    });
-    alert('このレクチャーを完了しました！');
+
+    try {
+      // Create a document in the contentStatus subcollection
+      const contentStatusDocRef = doc(
+        firestore,
+        'users',
+        currentUser.uid,
+        'contentStatus',
+        lectureId,
+      );
+      await setDoc(contentStatusDocRef, {
+        createdAt: serverTimestamp(),
+      });
+
+      // Update local state
+      const updatedContentStatus = new Set(currentUser.contentStatus).add(
+        lectureId,
+      );
+
+      setCurrentUser({
+        ...currentUser,
+        contentStatus: updatedContentStatus,
+      });
+
+      alert('このレクチャーを完了しました！');
+    } catch (error) {
+      console.error('Error completing lecture:', error);
+      alert('レクチャーの完了に失敗しました。');
+    }
   };
 
-  const isCompleted = currentUser?.contentStatus?.find(
-    (status) => status.course === lectureId,
-  )?.isComplete;
+  const isCompleted =
+    lectureId && currentUser?.contentStatus?.has(lectureId) ? true : false;
 
   const hasPrevious = !!getPreviousContentId(contents, lectureId ?? '');
   const hasNext = !!getNextContentId(contents, lectureId ?? '');

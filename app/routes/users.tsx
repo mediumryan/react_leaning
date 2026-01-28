@@ -1,5 +1,3 @@
-'use client';
-
 import { Plus, Search, UserCog, Trash2 } from 'lucide-react';
 import { Input } from '~/components/ui/input';
 import { Dialog, DialogTrigger } from '~/components/ui/dialog';
@@ -13,51 +11,141 @@ import {
   TableRow,
 } from '~/components/ui/table';
 import { Badge } from '~/components/ui/badge';
-import { useState } from 'react';
-import { currentUserAtom, type User } from '~/data/userData';
+import { useEffect, useState } from 'react'; // Import useEffect
+import { currentUserAtom, usersAtom, type User } from '~/data/userData';
 import UserForm from '~/components/UserForm';
 import { useAtom, useAtomValue } from 'jotai';
 import { Navigate } from 'react-router';
+import {
+  getAllUsers,
+  addUserToFirestore,
+  updateUserInFirestore,
+  deleteUserFromFirestore,
+} from '~/lib/firestore_utils'; // Import CUD functions
 
 export default function UserManagementPage() {
   const [openAdd, setOpenAdd] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Loading state for initial fetch
+  const [error, setError] = useState<string | null>(null); // Error state for initial fetch
 
   const currentUser = useAtomValue(currentUserAtom);
-
-  const [users, setUsers] = useAtom(usersAtom);
+  const [users, setUsers] = useAtom(usersAtom); // Standard atom usage
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [search, setSearch] = useState('');
 
-  const filteredUsers = users.filter(
+  // Fetch users on component mount
+  useEffect(() => {
+    const fetchUsers = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const fetchedUsers = await getAllUsers();
+        setUsers(fetchedUsers);
+      } catch (err: any) {
+        console.error('Failed to fetch users:', err);
+        setError('사용자 정보를 불러오는데 실패했습니다.');
+        setUsers(null); // Clear users on error
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchUsers();
+  }, [setUsers]); // Dependency array for useEffect
+
+  const filteredUsers = users?.filter(
     (user) =>
       user.name.toLowerCase().includes(search.toLowerCase()) ||
       user.nickname.toLowerCase().includes(search.toLowerCase()) ||
       user.email.toLowerCase().includes(search.toLowerCase()),
   );
 
-  const handleDelete = (id: number) => {
-    setUsers((prev) => prev.filter((user) => user.id !== id));
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('정말로 이 사용자를 삭제하시겠습니까?')) return;
+
+    const prevUsers = users; // Store current state for potential rollback
+
+    // Optimistic UI update
+    setUsers((currentUsers) =>
+      currentUsers ? currentUsers.filter((user) => user.uid !== id) : null,
+    );
+
+    try {
+      await deleteUserFromFirestore(id);
+      alert('사용자가 성공적으로 삭제되었습니다.');
+    } catch (err: any) {
+      console.error('Failed to delete user:', err);
+      setError('사용자 삭제에 실패했습니다.');
+      setUsers(prevUsers); // Rollback optimistic update
+    }
   };
 
-  const handleSave = (user: User) => {
-    // 유저 아이디가 존재한다면 수정, 그렇지 않다면 신규 추가
-    setUsers((prev) => {
-      const existingIndex = prev.findIndex((u) => u.id === user.id);
+  const handleSave = async (user: User) => {
+    const isNewUser = !users?.some((u) => u.uid === user.uid);
+    const prevUsers = users; // Store current state for potential rollback
+
+    // Optimistic UI update
+    setUsers((currentUsers) => {
+      if (!currentUsers) return [user]; // If no users, add this one
+      const existingIndex = currentUsers.findIndex((u) => u.uid === user.uid);
       if (existingIndex !== -1) {
-        const updated = [...prev];
+        // Update existing user
+        const updated = [...currentUsers];
         updated[existingIndex] = user;
         return updated;
       } else {
-        return [...prev, user];
+        // Add new user
+        return [...currentUsers, user];
       }
     });
-    setOpenAdd(false);
-    setOpenEdit(false);
+
+    try {
+      if (isNewUser) {
+        await addUserToFirestore(user);
+        alert('사용자가 성공적으로 추가되었습니다.');
+      } else {
+        // For updates, send the UID and fields to update
+        await updateUserInFirestore(user.uid, user);
+        alert('사용자 정보가 성공적으로 업데이트되었습니다.');
+      }
+    } catch (err: any) {
+      console.error('Failed to save user:', err);
+      setError('사용자 정보 저장에 실패했습니다.');
+      setUsers(prevUsers); // Rollback optimistic update
+    } finally {
+      setOpenAdd(false);
+      setOpenEdit(false);
+    }
   };
 
   if (!currentUser) {
     return <Navigate to="/login" replace />;
+  }
+
+  // Display loading/error states for the page
+  if (isLoading) {
+    return (
+      <div className="p-6 max-w-7xl mx-auto text-center text-lg">
+        사용자 정보를 불러오는 중...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6 max-w-7xl mx-auto text-center text-red-500 text-lg">
+        에러: {error}
+      </div>
+    );
+  }
+
+  // Ensure users is not null before rendering the table content
+  if (!users) {
+    return (
+      <div className="p-6 max-w-7xl mx-auto text-center text-lg">
+        사용자 정보가 없습니다.
+      </div>
+    );
   }
 
   return (
@@ -102,8 +190,8 @@ export default function UserManagementPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredUsers.map((user) => (
-              <TableRow key={user.id}>
+            {filteredUsers?.map((user) => (
+              <TableRow key={user.uid}>
                 <TableCell className="font-medium">{user.name}</TableCell>
                 <TableCell>{user.nickname}</TableCell>
                 <TableCell>{user.email}</TableCell>
@@ -118,7 +206,7 @@ export default function UserManagementPage() {
                     variant={
                       user.authority === 'admin'
                         ? 'default'
-                        : user.authority === 'operator'
+                        : user.authority === 'instructor'
                           ? 'secondary'
                           : 'outline'
                     }
@@ -158,7 +246,7 @@ export default function UserManagementPage() {
                       variant="ghost"
                       size="icon"
                       className="text-destructive"
-                      onClick={() => handleDelete(user.id)}
+                      onClick={() => handleDelete(user.uid)}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -167,7 +255,7 @@ export default function UserManagementPage() {
               </TableRow>
             ))}
 
-            {filteredUsers.length === 0 && (
+            {(filteredUsers === undefined || filteredUsers.length === 0) && (
               <TableRow>
                 <TableCell
                   colSpan={7}

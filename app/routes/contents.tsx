@@ -1,31 +1,38 @@
-import { ScrollArea } from '@radix-ui/react-scroll-area';
-import { useAtomValue } from 'jotai';
-import { useEffect, useState } from 'react';
-import { Navigate, useParams } from 'react-router';
-import { AppSidebar } from '~/components/Sidebar';
-import ContentFooter from '~/components/ContentFooter';
-import Contents from '~/components/Contents';
-import GoTopButton from '~/components/GoTopButton';
-import { Button } from '~/components/ui/button';
+// react
+import { useEffect, useState } from "react";
+// react-router
+import { Navigate, useParams } from "react-router";
+// atoms
+import { useAtom, useAtomValue } from "jotai";
+import { contentsQueryAtom } from "~/data/contentData";
+import { currentUserAtom } from "~/data/userData"; // Import setCurrentUser
+// shadcn/ui
+import { ScrollArea } from "~/components/ui/scroll-area";
+import { AppSidebar } from "~/components/Sidebar";
+import { Button } from "~/components/ui/button";
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
-} from '~/components/ui/sidebar';
-import { contentsAtom } from '~/data/contentData';
-import { currentUserAtom } from '~/data/userData';
-import { migrateContentToFirestore } from '~/script/migrateContent';
+} from "~/components/ui/sidebar";
+// components
+import ContentFooter from "~/components/ContentFooter";
+import Contents from "~/components/Contents";
+import GoTopButton from "~/components/GoTopButton";
+// helpers
+import { migrateContentToFirestore } from "~/script/migrateContent";
+import { doc, serverTimestamp, setDoc } from "firebase/firestore";
+import { firestore } from "~/lib/firebase";
 
 export default function LectureLayout() {
-  const currentUser = useAtomValue(currentUserAtom);
-  const contents = useAtomValue(contentsAtom);
+  const [currentUser, setCurrentUser] = useAtom(currentUserAtom); // Use useAtom for currentUser
+  const [{ data: contents }] = useAtom(contentsQueryAtom);
 
   const lectureId = useParams().id;
 
-  const [headerTitle, setHeaderTitle] = useState('');
+  const [headerTitle, setHeaderTitle] = useState("");
 
   useEffect(() => {
-    console.log(contents);
     if (!lectureId || !contents) return;
     const foundContent = contents.find((item) => item.id === lectureId);
     if (foundContent) {
@@ -33,17 +40,47 @@ export default function LectureLayout() {
     }
   }, [lectureId, contents]);
 
+  const handleQuizCompletion = async (contentId: string) => {
+    if (!currentUser) return;
+
+    try {
+      // Check if already completed to avoid unnecessary Firestore writes and state updates
+      if (currentUser.contentStatus.has(contentId)) {
+        console.log(`Content ${contentId} already marked as complete.`);
+        return;
+      }
+
+      // Create a document in the contentStatus subcollection
+      const contentStatusDocRef = doc(
+        firestore,
+        'users',
+        currentUser.uid,
+        'contentStatus',
+        contentId,
+      );
+      await setDoc(contentStatusDocRef, {
+        createdAt: serverTimestamp(),
+      });
+
+      // Update local state
+      const updatedContentStatus = new Set(currentUser.contentStatus).add(
+        contentId,
+      );
+
+      setCurrentUser({
+        ...currentUser,
+        contentStatus: updatedContentStatus,
+      });
+
+      console.log(`Content ${contentId} marked as complete successfully.`);
+    } catch (error) {
+      console.error('Error marking content as complete:', error);
+      alert('コンテンツ完了処理中にエラーが発生しました。');
+    }
+  };
+
   if (!currentUser) {
     return <Navigate to="/login" replace />;
-  }
-
-  // Add loading state for contents
-  if (!contents) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p>ローディング中...</p>
-      </div>
-    );
   }
 
   return (
@@ -68,7 +105,7 @@ export default function LectureLayout() {
 
           <ScrollArea className="flex-1">
             <main className="flex flex-col gap-4 items-center justify-center mx-auto max-w-4xl p-6 md:p-10">
-              <Contents lectureId={lectureId} />
+              <Contents lectureId={lectureId} onQuizComplete={handleQuizCompletion} />
               <ContentFooter />
             </main>
           </ScrollArea>

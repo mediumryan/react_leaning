@@ -1,5 +1,5 @@
-import type { Content } from "~/data/contentData";
-import type { User } from "~/data/userData";
+import type { Content } from '~/data/contentData';
+import type { User } from '~/data/userData';
 
 export const getFirstContentId = (contentList: Content[]) => {
   if (contentList.length === 0) return null;
@@ -67,33 +67,44 @@ export const groupContentBySection = (contentList: Content[]) => {
 export const mappingTitlebySection = (section: number) => {
   switch (section) {
     case 1:
-      return "1. Reactの基礎";
+      return '1. Reactの基礎';
     case 2:
-      return "2. Reactの基本構文";
+      return '2. Reactの基本構文';
     case 3:
-      return "3. PropsとState";
+      return '3. PropsとState';
     case 4:
-      return "4. イベントとフォーム";
+      return '4. イベントとフォーム';
     case 5:
-      return "5. コンポーネントのライフサイクルとフック";
+      return '5. コンポーネントのライフサイクルとフック';
     default:
-      return "";
+      return '';
   }
-};
-
-export const generateContentStatusForUser = (contentList: Content[]) => {
-  return contentList.map((item) => ({
-    course: item.id,
-    isComplete: false,
-  }));
 };
 
 export const isCompleteCourse = (
   content: Content,
   currentUser: User | null,
 ) => {
-  return (
-    currentUser?.contentStatus?.find((status) => status.course === content.id)
-      ?.isComplete || false
-  );
+  if (!currentUser) return false;
+  return currentUser.contentStatus.has(content.id);
+};
+
+export const checkShortAnswer = (
+  correctAnswerString: string,
+  userAnswer: string,
+) => {
+  const possibleAnswers = correctAnswerString
+    .split(',')
+    .map((ans) => ans.trim().toLowerCase());
+
+  console.log('possibleAnswers:', possibleAnswers);
+
+  const normalizedUserAnswer = userAnswer.trim().toLowerCase();
+
+  const isCorrect = possibleAnswers.some((ans) => ans === normalizedUserAnswer);
+
+  // Return the first possible answer for feedback
+  const firstCorrectAnswer = possibleAnswers[0] || '';
+
+  return { isCorrect, firstCorrectAnswer };
 };

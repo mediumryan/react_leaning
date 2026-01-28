@@ -1,15 +1,17 @@
 import { useEffect, useState } from 'react';
 import { Card } from './ui/card';
-import { useAtomValue } from 'jotai';
-import { contentsAtom, type Content } from '~/data/contentData';
+import { useAtom } from 'jotai';
 import ContentQuiz from './ContentQuiz';
+import { contentsQueryAtom, type Content } from '~/data/contentData';
+import ReactMarkdown from 'react-markdown';
 
 interface ContentsProps {
   lectureId: string | undefined;
+  onQuizComplete?: (contentId: string) => void; // Add this prop
 }
 
-export default function Contents({ lectureId }: ContentsProps) {
-  const contents = useAtomValue(contentsAtom);
+export default function Contents({ lectureId, onQuizComplete }: ContentsProps) {
+  const [{ data: contents, isPending, isError }] = useAtom(contentsQueryAtom);
   const [currentContent, setCurrentContent] = useState<Content | null>(null);
 
   useEffect(() => {
@@ -26,11 +28,13 @@ export default function Contents({ lectureId }: ContentsProps) {
     switch (currentContent.type) {
       case 0:
         // Descriptive Content
-        return <div dangerouslySetInnerHTML={{ __html: currentContent.content }} />;
+        return <ReactMarkdown>{currentContent.content}</ReactMarkdown>;
       case 1:
       case 2:
         // Multiple Choice or Short Answer Quiz
-        return <ContentQuiz quiz={currentContent} />;
+        return (
+          <ContentQuiz quiz={currentContent} onQuizComplete={onQuizComplete} />
+        );
       default:
         return <p>Unknown content type.</p>;
     }

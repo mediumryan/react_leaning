@@ -1,7 +1,5 @@
-import type {
-  MultipleChoiceQuiz,
-  ShortAnswerQuiz,
-} from '~/data/contentData';
+import { useState } from 'react';
+import type { MultipleChoiceQuiz, ShortAnswerQuiz } from '~/data/contentData';
 import { Button } from './ui/button';
 import {
   Field,
@@ -12,25 +10,103 @@ import {
 } from './ui/field';
 import { Input } from './ui/input';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
+import { cn } from '~/lib/utils'; // Assuming cn for utility classes
+import { checkShortAnswer } from '~/helper/helper'; // Import the helper
+import { useAtom } from 'jotai';
+import {
+  displayedCorrectAnswerAtom,
+  isCorrectAtom,
+  isSubmittedAtom,
+  showFeedbackAtom,
+  userAnswersAtom,
+} from '~/data/quizData';
 
 interface ContentQuizProps {
   quiz: MultipleChoiceQuiz | ShortAnswerQuiz;
+  onQuizComplete?: (contentId: string) => void; // Add this prop
 }
 
-export default function ContentQuiz({ quiz }: ContentQuizProps) {
+export default function ContentQuiz({
+  quiz,
+  onQuizComplete,
+}: ContentQuizProps) {
+  const [userAnswer, setUserAnswer] = useAtom(userAnswersAtom);
+  const [isSubmitted, setIsSubmitted] = useAtom(isSubmittedAtom);
+  const [isCorrect, setIsCorrect] = useAtom(isCorrectAtom);
+  const [showFeedback, setShowFeedback] = useAtom(showFeedbackAtom);
+  const [displayedCorrectAnswer, setDisplayedCorrectAnswer] = useAtom(
+    displayedCorrectAnswerAtom,
+  );
+
+  const handleAnswerChange = (value: string) => {
+    if (!isSubmitted) {
+      setUserAnswer(value);
+    }
+  };
+
+  const handleSubmit = () => {
+    setIsSubmitted(true);
+    setShowFeedback(true);
+
+    let correct = false;
+    if (quiz.type === 1) {
+      // MultipleChoiceQuiz
+      const selectedIndex = quiz.options.findIndex(
+        (option) => option === userAnswer,
+      );
+      correct = selectedIndex === quiz.correctAnswerIndex;
+    } else if (quiz.type === 2) {
+      // ShortAnswerQuiz
+      const { isCorrect: shortAnswerCorrect, firstCorrectAnswer } =
+        checkShortAnswer(quiz.correctAnswer, userAnswer);
+      correct = shortAnswerCorrect;
+      setDisplayedCorrectAnswer(firstCorrectAnswer);
+    }
+    setIsCorrect(correct);
+
+    if (correct && onQuizComplete) {
+      onQuizComplete(quiz.id);
+    }
+  };
+
+  const handleRetry = () => {
+    setUserAnswer('');
+    setIsSubmitted(false);
+    setIsCorrect(false);
+    setShowFeedback(false);
+    setDisplayedCorrectAnswer('');
+  };
+
+  const isButtonDisabled = !userAnswer || (isSubmitted && isCorrect);
+
   return (
     <div>
       {quiz.type === 1 && (
         <FieldSet className="w-full">
           <FieldLegend variant="label">Quiz</FieldLegend>
           <FieldDescription>{quiz.question}</FieldDescription>
-          <RadioGroup defaultValue={quiz.options[0]}>
+          <RadioGroup
+            value={userAnswer}
+            onValueChange={handleAnswerChange}
+            disabled={isSubmitted}
+          >
             {quiz.options.map((option, index) => (
               <Field orientation="horizontal" key={index}>
                 <RadioGroupItem value={option} id={`${quiz.id}-${index}`} />
                 <FieldLabel
                   htmlFor={`${quiz.id}-${index}`}
-                  className="font-normal"
+                  className={cn(
+                    'font-normal',
+                    showFeedback &&
+                      isSubmitted &&
+                      index === quiz.correctAnswerIndex &&
+                      'text-green-600 font-bold',
+                    showFeedback &&
+                      isSubmitted &&
+                      !isCorrect &&
+                      option === userAnswer &&
+                      'text-red-600',
+                  )}
                 >
                   {option}
                 </FieldLabel>
@@ -47,14 +123,46 @@ export default function ContentQuiz({ quiz }: ContentQuizProps) {
           </FieldLabel>
           <Input
             id={`quiz-input-${quiz.id}`}
-            className="max-w-sm"
+            className={cn(
+              'max-w-sm',
+              showFeedback && isSubmitted && isCorrect && 'border-green-500',
+              showFeedback && isSubmitted && !isCorrect && 'border-red-500',
+            )}
             type="text"
             placeholder="解答を入力してください"
+            value={userAnswer}
+            onChange={(e) => handleAnswerChange(e.target.value)}
+            disabled={isSubmitted}
           />
+          {showFeedback &&
+            isSubmitted &&
+            !isCorrect &&
+            displayedCorrectAnswer && (
+              <p className="text-sm text-green-600 mt-1">
+                正解は: {displayedCorrectAnswer}
+              </p>
+            )}
         </Field>
       )}
 
-      <Button className="mt-4 float-right">Submit</Button>
+      {showFeedback && isSubmitted && (
+        <p
+          className={cn(
+            'text-lg font-semibold mt-4',
+            isCorrect ? 'text-green-600' : 'text-red-600',
+          )}
+        >
+          {isCorrect ? '正解です！' : '残念、不正解です。'}
+        </p>
+      )}
+
+      <Button
+        className="mt-4 float-right"
+        onClick={isSubmitted && !isCorrect ? handleRetry : handleSubmit}
+        disabled={isButtonDisabled}
+      >
+        {isSubmitted && !isCorrect ? '再試行' : '提出'}
+      </Button>
     </div>
   );
 }

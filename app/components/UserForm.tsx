@@ -39,7 +39,7 @@ function UserForm({ user, onSave, setOpen }: UserFormProps) {
       grade,
       exp,
       authority,
-      contentStatus: user?.contentStatus ?? [],
+      contentStatus: user?.contentStatus ?? new Set(),
     });
 
     setOpen?.(false);

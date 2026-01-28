@@ -1,35 +1,38 @@
-import { Button } from '~/components/ui/button';
-import type { Route } from './+types/home';
-import { Navigate, useNavigate } from 'react-router';
-import { ButtonGroup } from '~/components/ui/button-group';
-import { useAtom, useAtomValue } from 'jotai';
-import { currentUserAtom, type Course } from '~/data/userData';
-import { useState } from 'react';
-import { H1_STYLE, H3_STYLE } from '~/components/styleFormat/style';
-import { FaReact } from 'react-icons/fa';
-import { BookOpen, MessagesSquare } from 'lucide-react';
-import { getFirstContentId } from '~/helper/helper';
-import { updateUserCourse } from '~/lib/firestore_utils';
-import { contentsAtom } from '~/data/contentData';
+import { Button } from "~/components/ui/button";
+import type { Route } from "./+types/home";
+import { Navigate, useNavigate } from "react-router";
+import { ButtonGroup } from "~/components/ui/button-group";
+import { useAtom, useAtomValue } from "jotai";
+import { currentUserAtom, type Course } from "~/data/userData";
+import { useEffect, useState } from "react";
+import { H1_STYLE, H3_STYLE } from "~/components/styleFormat/style";
+import { FaReact } from "react-icons/fa";
+import { BookOpen, MessagesSquare } from "lucide-react";
+import { getFirstContentId } from "~/helper/helper";
+import { updateUserCourse } from "~/lib/firestore_utils";
+import { contentsQueryAtom } from "~/data/contentData";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: 'React Learning by Ryan' },
-    { name: 'React Learning', content: 'Welcome to React Learning App!' },
+    { title: "React Learning by Ryan" },
+    { name: "React Learning", content: "Welcome to React Learning App!" },
   ];
 }
 
 export default function Home() {
   const navigate = useNavigate();
   const [currentUser, setCurrentUser] = useAtom(currentUserAtom);
-  const contents = useAtomValue(contentsAtom); // Get contents from atom
+  const [{ data: contents, isPending, isError }] = useAtom(contentsQueryAtom);
+
+  useEffect(() => {
+    console.log("Current User:", currentUser);
+  }, []);
 
   const [selectedCourse, setSelectedCourse] = useState<Course>(
-    currentUser?.course as Course | 'Beginner',
+    currentUser?.course as Course | "Beginner",
   );
 
   const handleClick = () => {
-    // Pass contents to getFirstContentId
     if (contents) {
       const firstContentId = getFirstContentId(contents);
       if (firstContentId) {
@@ -38,7 +41,7 @@ export default function Home() {
     }
   };
 
-  const courseOptions: Course[] = ['Beginner', 'Intermediate', 'Advanced'];
+  const courseOptions: Course[] = ["Beginner", "Intermediate", "Advanced"];
 
   const handleClickChangeCourse = async () => {
     if (!currentUser) return;
@@ -50,10 +53,10 @@ export default function Home() {
         // 2. On success, update local Jotai state
         setCurrentUser({ ...currentUser, course: selectedCourse });
 
-        alert('コースが変更されました');
+        alert("コースが変更されました");
       } catch (error) {
-        console.error('Failed to update course:', error);
-        alert('コースの変更に失敗しました。');
+        console.error("Failed to update course:", error);
+        alert("コースの変更に失敗しました。");
       }
     }
   };
@@ -73,7 +76,7 @@ export default function Home() {
 
   return (
     <main className="p-8 flex flex-col justify-center items-center gap-2">
-      <h1 className={`${H1_STYLE}` + ' flex items-center gap-3 tracking-wide'}>
+      <h1 className={`${H1_STYLE}` + " flex items-center gap-3 tracking-wide"}>
         <FaReact id="react-icon" className="text-blue-600 animate-spin" />
         <span>React Learning</span>
       </h1>
@@ -87,14 +90,14 @@ export default function Home() {
         {courseOptions.map((course) => (
           <Button
             key={course}
-            variant={selectedCourse === course ? 'default' : 'outline'}
+            variant={selectedCourse === course ? "default" : "outline"}
             onClick={() => setSelectedCourse(course)}
           >
-            {course === 'Beginner'
-              ? 'Beginner - 初心者コース'
-              : course === 'Intermediate'
-                ? 'Intermediate - 中級者コース'
-                : 'Advanced - 上級者コース'}
+            {course === "Beginner"
+              ? "Beginner - 初心者コース"
+              : course === "Intermediate"
+                ? "Intermediate - 中級者コース"
+                : "Advanced - 上級者コース"}
           </Button>
         ))}
       </ButtonGroup>
@@ -109,7 +112,7 @@ export default function Home() {
           <BookOpen className="w-4 h-4 mr-2" />
           <span>React学習</span>
         </Button>
-        <Button onClick={() => navigate('/community')}>
+        <Button onClick={() => navigate("/community")}>
           <MessagesSquare className="w-4 h-4 mr-2" />
           <span>コミュニティ</span>
         </Button>

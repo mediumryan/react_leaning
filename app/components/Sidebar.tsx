@@ -1,4 +1,4 @@
-import { BookOpen, PlayCircle, CheckCircle2, Check } from 'lucide-react';
+import { BookOpen, PlayCircle, CheckCircle2, Check } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -9,24 +9,24 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from './ui/sidebar';
-import { Link, useParams } from 'react-router';
-import { Progress } from './ui/progress';
-import { useEffect, useState } from 'react';
-import { useAtomValue } from 'jotai';
-import { currentUserAtom } from '~/data/userData';
+} from "./ui/sidebar";
+import { Link, useParams } from "react-router";
+import { Progress } from "./ui/progress";
+import { useEffect, useState } from "react";
+import { useAtom, useAtomValue } from "jotai";
+import { currentUserAtom } from "~/data/userData";
 import {
   groupContentBySection,
   isCompleteCourse,
   mappingTitlebySection,
-} from '~/helper/helper';
-import { FaReact } from 'react-icons/fa';
-import { contentsAtom } from '~/data/contentData';
+} from "~/helper/helper";
+import { FaReact } from "react-icons/fa";
+import { contentsQueryAtom } from "~/data/contentData";
 
 export function AppSidebar() {
   const contentId = useParams().id;
   const currentUser = useAtomValue(currentUserAtom);
-  const contents = useAtomValue(contentsAtom);
+  const [{ data: contents, isPending, isError }] = useAtom(contentsQueryAtom);
 
   const [progress, setProgress] = useState(0);
 
@@ -35,9 +35,7 @@ export function AppSidebar() {
   useEffect(() => {
     const contentLength = contents?.length || 0;
     if (!currentUser || !contents) return;
-    const completedCount =
-      currentUser?.contentStatus?.filter((status) => status.isComplete)
-        .length || 0;
+    const completedCount = currentUser?.contentStatus?.size || 0;
     const calculatedProgress = Math.floor(
       (completedCount / contentLength) * 100,
     );
@@ -80,8 +78,8 @@ export function AppSidebar() {
                       <SidebarMenuButton
                         className={`${
                           contentId === content.id
-                            ? 'bg-blue-400 text-white'
-                            : ''
+                            ? "bg-blue-400 text-white"
+                            : ""
                         } `}
                       >
                         {/* <content.icon className="mr-2 h-4 w-4" /> */}
@@ -89,8 +87,8 @@ export function AppSidebar() {
                         <Check
                           className={`${
                             isCompleteCourse(content, currentUser)
-                              ? 'block'
-                              : 'hidden'
+                              ? "block"
+                              : "hidden"
                           } ml-auto h-4 w-4 text-white bg-blue-400 rounded-full`}
                         />
                       </SidebarMenuButton>
