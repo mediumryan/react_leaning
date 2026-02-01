@@ -43,12 +43,12 @@ export function CommonAlert() {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
+          <AlertDialogAction onClick={() => handleClose(true)}>
+            OK
+          </AlertDialogAction>
           <AlertDialogCancel onClick={() => handleClose(false)}>
             Cancel
           </AlertDialogCancel>
-          <AlertDialogAction onClick={() => handleClose(true)}>
-            Continue
-          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

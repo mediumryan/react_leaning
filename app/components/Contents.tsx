@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
-import { Card } from './ui/card';
-import { useAtom } from 'jotai';
-import ContentQuiz from './ContentQuiz';
-import { contentsQueryAtom, type Content } from '~/data/contentData';
-import ReactMarkdown from 'react-markdown';
+import { useEffect, useState } from "react";
+import { Card } from "./ui/card";
+import { useAtom } from "jotai";
+import ContentQuiz from "./ContentQuiz";
+import { contentsQueryAtom, type Content } from "~/data/contentData";
+import ReactMarkdown from "react-markdown";
 
 interface ContentsProps {
   lectureId: string | undefined;
@@ -40,5 +40,9 @@ export default function Contents({ lectureId, onQuizComplete }: ContentsProps) {
     }
   };
 
-  return <Card className="p-8 z-0 w-full">{renderContent()}</Card>;
+  return (
+    <Card className="p-8 mb-8 z-0 w-full bg-gray-950/5 shadow-2xl">
+      {renderContent()}
+    </Card>
+  );
 }

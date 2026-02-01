@@ -1,5 +1,6 @@
-import type { Content } from '~/data/contentData';
-import type { User } from '~/data/userData';
+import type { Content } from "~/data/contentData";
+import { ALLOWED_TYPES, MAX_FILE_SIZE } from "~/data/postData";
+import type { User } from "~/data/userData";
 
 export const getFirstContentId = (contentList: Content[]) => {
   if (contentList.length === 0) return null;
@@ -47,6 +48,21 @@ export const getPreviousContentId = (
   return null;
 };
 
+export const mappingTitlebySection = (section: number) => {
+  switch (section) {
+    case 1:
+      return "Section 1";
+    case 2:
+      return "Section 2";
+    case 3:
+      return "Section 3";
+    case 4:
+      return "Section 4";
+    default:
+      return "";
+  }
+};
+
 export const groupContentBySection = (contentList: Content[]) => {
   // section별로 그룹화
   const groupedBySection = Object.values(
@@ -64,23 +80,6 @@ export const groupContentBySection = (contentList: Content[]) => {
   return groupedBySection;
 };
 
-export const mappingTitlebySection = (section: number) => {
-  switch (section) {
-    case 1:
-      return '1. Reactの基礎';
-    case 2:
-      return '2. Reactの基本構文';
-    case 3:
-      return '3. PropsとState';
-    case 4:
-      return '4. イベントとフォーム';
-    case 5:
-      return '5. コンポーネントのライフサイクルとフック';
-    default:
-      return '';
-  }
-};
-
 export const isCompleteCourse = (
   content: Content,
   currentUser: User | null,
@@ -94,17 +93,57 @@ export const checkShortAnswer = (
   userAnswer: string,
 ) => {
   const possibleAnswers = correctAnswerString
-    .split(',')
+    .split(",")
     .map((ans) => ans.trim().toLowerCase());
-
-  console.log('possibleAnswers:', possibleAnswers);
 
   const normalizedUserAnswer = userAnswer.trim().toLowerCase();
 
   const isCorrect = possibleAnswers.some((ans) => ans === normalizedUserAnswer);
 
   // Return the first possible answer for feedback
-  const firstCorrectAnswer = possibleAnswers[0] || '';
+  const firstCorrectAnswer = possibleAnswers[0] || "";
 
   return { isCorrect, firstCorrectAnswer };
+};
+
+export const validateImageFile = (file: File) => {
+  if (!ALLOWED_TYPES.includes(file.type)) {
+    return "JPEG, PNG, WEBP 形式の画像のみアップロード可能です。";
+  }
+
+  if (file.size > MAX_FILE_SIZE) {
+    return "画像のサイズは5MB以下でなければなりません。";
+  }
+
+  return null;
+};
+
+export const getUserBorderColorByClass = (grade: string) => {
+  switch (grade) {
+    case "Bronze":
+      return "border-orange-950";
+    case "Silver":
+      return "border-gray-500";
+    case "Gold":
+      return "border-yellow-400";
+    case "Platinum":
+      return "border-cyan-400";
+    default:
+      return "border-gray-100";
+  }
+};
+
+export const getUserColorByClass = (grade: string) => {
+  switch (grade) {
+    case "Bronze":
+      return "text-orange-950";
+    case "Silver":
+      return "text-gray-500";
+    case "Gold":
+      return "text-yellow-400";
+    case "Platinum":
+      return "text-cyan-400";
+    default:
+      return "text-gray-100";
+  }
 };

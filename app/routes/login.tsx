@@ -1,25 +1,25 @@
-import { useAtomValue } from 'jotai';
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router';
-import { H2_STYLE } from '~/components/styleFormat/style';
-import { Button } from '~/components/ui/button';
-import { ButtonGroup } from '~/components/ui/button-group';
-import { Card } from '~/components/ui/card';
-import { Input } from '~/components/ui/input';
-import { Label } from '~/components/ui/label';
-import { currentUserAtom } from '~/data/userData';
-import { signIn } from '~/lib/auth';
+import { useAtomValue } from "jotai";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
+import { H2_STYLE } from "~/style/commonStyle";
+import { Button } from "~/components/ui/button";
+import { ButtonGroup } from "~/components/ui/button-group";
+import { Card } from "~/components/ui/card";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
+import { currentUserAtom } from "~/data/userData";
+import { signIn } from "~/lib/auth";
 
 const Login = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const currentUser = useAtomValue(currentUserAtom);
 
   const handleClickSignUp = () => {
-    navigate('/signup');
+    navigate("/signup");
   };
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -27,7 +27,7 @@ const Login = () => {
     setError(null);
     try {
       await signIn(email, password);
-      alert('ログイン成功!');
+      alert("ログイン成功!");
     } catch (err: any) {
       setError(err.message);
       alert(`ログイン失敗: ${err.message}`);
@@ -36,14 +36,14 @@ const Login = () => {
 
   useEffect(() => {
     if (currentUser) {
-      navigate('/');
+      navigate("/");
     }
   }, [currentUser]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <Card className="p-8 w-full max-w-sm shadow-lg">
-        <h2 className={H2_STYLE + ' mb-6 text-center'}>ログイン</h2>
+        <h2 className={H2_STYLE + " mb-6 text-center"}>ログイン</h2>
         <form className="space-y-4">
           <div>
             <Label htmlFor="email">メール</Label>

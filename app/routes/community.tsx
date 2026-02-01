@@ -1,41 +1,37 @@
 // react
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 // react-router
-import { Navigate } from 'react-router';
+import { Navigate } from "react-router";
 // atoms
-import { useSetAtom, useAtomValue, useAtom } from 'jotai';
-import { currentUserAtom } from '~/data/userData';
-import {
-  postOrderAtom,
-  postsAtom,
-  refetchAtom,
-  type PostType,
-} from '~/data/postData';
+import { useSetAtom, useAtomValue, useAtom } from "jotai";
+import { currentUserAtom } from "~/data/userData";
+import { refetchAtom } from "~/data/commonData";
+import { postOrderAtom, postsAtom, type PostType } from "~/data/postData";
 // shadcn/ui
-import { Button } from '~/components/ui/button';
+import { Button } from "~/components/ui/button";
 import {
   Card,
   CardHeader,
   CardTitle,
   CardContent,
   CardFooter,
-} from '~/components/ui/card';
+} from "~/components/ui/card";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '~/components/ui/dialog';
-import { ButtonGroup } from '~/components/ui/button-group';
-import { Badge } from '~/components/ui/badge';
+} from "~/components/ui/dialog";
+import { ButtonGroup } from "~/components/ui/button-group";
+import { Badge } from "~/components/ui/badge";
 // icons
-import { HeartIcon, PlusIcon } from 'lucide-react';
+import { HeartIcon, PlusIcon } from "lucide-react";
 // components
-import PostForm from '~/components/PostForm';
-import { BackgroundSpinner } from '~/components/BackgroundSpinner';
+import PostForm from "~/components/PostForm";
+import { BackgroundSpinner } from "~/components/BackgroundSpinner";
 // helpers
-import { addPost, deletePost, likePost, updatePost } from '~/data/postApi';
-import { confirm } from '~/helper/confirm';
+import { addPost, deletePost, likePost, updatePost } from "~/data/postApi";
+import { confirm } from "~/helper/confirm";
 
 function Community() {
   const currentUser = useAtomValue(currentUserAtom);
@@ -56,12 +52,14 @@ function Community() {
 
       let sortedPosts = [...initialPosts];
 
-      if (postOrder === 'new') {
+      if (postOrder === "new") {
         sortedPosts.sort(
           (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
         );
-      } else if (postOrder === 'popular') {
-        sortedPosts.sort((a, b) => b.like - a.like);
+
+        console.log("Sorted by new:", sortedPosts);
+      } else if (postOrder === "popular") {
+        sortedPosts.sort((a, b) => b.likeCount - a.likeCount);
       }
 
       setPosts(sortedPosts);
@@ -70,27 +68,30 @@ function Community() {
     sortPosts();
   }, [initialPosts, postOrder]);
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (post: PostType) => {
     const ok = await confirm({
       icon: 1,
-      message: '削除しますか？',
-      size: 'sm',
+      message: "削除しますか？",
+      size: "sm",
     });
 
     if (!ok) return;
 
-    await deletePost(id);
+    await deletePost(post);
     setRefetch((c) => c + 1);
   };
 
   const handleSave = async (
-    post: Omit<PostType, 'id' | 'createdAt' | 'like' | 'likedUsers'>,
+    post: Omit<PostType, "id" | "createdAt" | "likeCount" | "likedUsers"> & {
+      userId: string;
+    },
   ) => {
     if (editingPost) {
-      await updatePost(editingPost.id, post);
+      await updatePost(editingPost.id, editingPost, post);
     } else {
-      await addPost(post);
+      await addPost(post, post.userId || "Anonymous");
     }
+
     setRefetch((c) => c + 1);
   };
 
@@ -109,7 +110,7 @@ function Community() {
         p.id === post.id
           ? {
               ...p,
-              like: p.isLiked ? p.like - 1 : p.like + 1,
+              likeCount: p.isLiked ? p.likeCount - 1 : p.likeCount + 1,
               isLiked: !p.isLiked,
             }
           : p,
@@ -119,7 +120,7 @@ function Community() {
     try {
       await likePost(post.id, currentUser.uid);
     } catch (err) {
-      console.error('Like update failed, reverting:', err);
+      console.error("Like update failed, reverting:", err);
       // On error, refetch from the server to get the correct state
       setRefetch((c) => c + 1);
     }
@@ -141,14 +142,14 @@ function Community() {
           <div className="flex justify-between items-center">
             <ButtonGroup className="gap-0.5">
               <Button
-                onClick={() => setPostOrder('new')}
-                variant={postOrder === 'new' ? 'default' : 'secondary'}
+                onClick={() => setPostOrder("new")}
+                variant={postOrder === "new" ? "default" : "secondary"}
               >
                 最新
               </Button>
               <Button
-                onClick={() => setPostOrder('popular')}
-                variant={postOrder === 'popular' ? 'default' : 'secondary'}
+                onClick={() => setPostOrder("popular")}
+                variant={postOrder === "popular" ? "default" : "secondary"}
               >
                 人気
               </Button>
@@ -211,30 +212,34 @@ function Community() {
                 >
                   <HeartIcon
                     className="w-4 h-4"
-                    fill={post.isLiked ? 'red' : 'none'}
+                    fill={post.isLiked ? "red" : "none"}
                   />
-                  {post.like}
+                  {post.likeCount}
                 </Button>
 
-                <div className="flex gap-2">
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => {
-                      setEditingPost(post);
-                      setShowForm(true);
-                    }}
-                  >
-                    修正
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => handleDelete(post.id)}
-                  >
-                    削除
-                  </Button>
-                </div>
+                {(currentUser.authority === "admin" ||
+                  currentUser.authority === "instructor" ||
+                  currentUser.uid === post.userId) && (
+                  <div className="flex gap-2">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => {
+                        setEditingPost(post);
+                        setShowForm(true);
+                      }}
+                    >
+                      修正
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => handleDelete(post)}
+                    >
+                      削除
+                    </Button>
+                  </div>
+                )}
               </CardFooter>
               {isNewPost(post) && (
                 <Badge className="absolute top-0 left-0 animate-bounce">
@@ -251,7 +256,7 @@ function Community() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editingPost ? 'ポスト修正' : 'ポスト作成'}
+              {editingPost ? "ポスト修正" : "ポスト作成"}
             </DialogTitle>
           </DialogHeader>
 

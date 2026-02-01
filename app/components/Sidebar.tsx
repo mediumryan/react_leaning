@@ -1,4 +1,15 @@
+// react
+import { useEffect, useState } from "react";
+// react-router
+import { Link, useParams } from "react-router";
+// atoms
+import { useAtom, useAtomValue } from "jotai";
+import { currentUserAtom } from "~/data/userData";
+import { contentsQueryAtom } from "~/data/contentData";
+// icons
 import { BookOpen, PlayCircle, CheckCircle2, Check } from "lucide-react";
+import { FaReact } from "react-icons/fa";
+// shadcn/ui
 import {
   Sidebar,
   SidebarContent,
@@ -10,23 +21,18 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "./ui/sidebar";
-import { Link, useParams } from "react-router";
 import { Progress } from "./ui/progress";
-import { useEffect, useState } from "react";
-import { useAtom, useAtomValue } from "jotai";
-import { currentUserAtom } from "~/data/userData";
+// helpers
 import {
   groupContentBySection,
   isCompleteCourse,
   mappingTitlebySection,
 } from "~/helper/helper";
-import { FaReact } from "react-icons/fa";
-import { contentsQueryAtom } from "~/data/contentData";
 
 export function AppSidebar() {
   const contentId = useParams().id;
   const currentUser = useAtomValue(currentUserAtom);
-  const [{ data: contents, isPending, isError }] = useAtom(contentsQueryAtom);
+  const [{ data: contents }] = useAtom(contentsQueryAtom);
 
   const [progress, setProgress] = useState(0);
 

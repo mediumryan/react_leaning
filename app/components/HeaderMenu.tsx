@@ -1,3 +1,10 @@
+// react-router
+import { useNavigate } from "react-router";
+// atoms
+import { useAtom } from "jotai";
+import { currentUserAtom } from "~/data/userData";
+import { contentsQueryAtom } from "~/data/contentData";
+// icons
 import {
   BookOpen,
   House,
@@ -5,20 +12,20 @@ import {
   MessagesSquare,
   UsersRound,
 } from "lucide-react";
+// shadcn/ui
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Avatar, AvatarFallback } from "~/components/ui/avatar";
-import { useNavigate } from "react-router";
-import { useAtom, useAtomValue } from "jotai";
-import { currentUserAtom } from "~/data/userData";
-import { getFirstContentId } from "~/helper/helper";
+// helpers
+import { getFirstContentId, getUserBorderColorByClass } from "~/helper/helper";
+// firebase
 import { logout } from "~/lib/auth";
-import { contentsQueryAtom } from "~/data/contentData";
+import { cn } from "~/lib/utils";
 
 export function HeaderMenu() {
   const navigate = useNavigate();
 
   const [currentUser, setCurrentUser] = useAtom(currentUserAtom);
-  const [{ data: contents, isPending, isError }] = useAtom(contentsQueryAtom);
+  const [{ data: contents }] = useAtom(contentsQueryAtom);
 
   const handleClickNavigate = (path: string) => {
     navigate(`/${path}`);
@@ -35,7 +42,12 @@ export function HeaderMenu() {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Avatar className="fixed top-3 right-8 w-10 h-10 cursor-pointer z-50">
+        <Avatar
+          className={cn(
+            "fixed top-3 right-8 w-10 h-10 cursor-pointer z-50 border-4",
+            getUserBorderColorByClass(currentUser?.grade ?? ""),
+          )}
+        >
           <AvatarFallback className="bg-black text-white select-none">
             <span className="">
               {currentUser?.name

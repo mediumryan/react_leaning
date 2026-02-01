@@ -1,28 +1,28 @@
 // react
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 // react-router
-import { Navigate, useParams } from "react-router";
+import { Navigate, useParams } from 'react-router';
 // atoms
-import { useAtom, useAtomValue } from "jotai";
-import { contentsQueryAtom } from "~/data/contentData";
-import { currentUserAtom } from "~/data/userData"; // Import setCurrentUser
+import { useAtom } from 'jotai';
+import { contentsQueryAtom } from '~/data/contentData';
+import { currentUserAtom } from '~/data/userData'; // Import setCurrentUser
 // shadcn/ui
-import { ScrollArea } from "~/components/ui/scroll-area";
-import { AppSidebar } from "~/components/Sidebar";
-import { Button } from "~/components/ui/button";
+import { ScrollArea } from '~/components/ui/scroll-area';
+import { AppSidebar } from '~/components/Sidebar';
+import { Button } from '~/components/ui/button';
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
-} from "~/components/ui/sidebar";
+} from '~/components/ui/sidebar';
 // components
-import ContentFooter from "~/components/ContentFooter";
-import Contents from "~/components/Contents";
-import GoTopButton from "~/components/GoTopButton";
+import ContentFooter from '~/components/ContentFooter';
+import Contents from '~/components/Contents';
+import GoTopButton from '~/components/GoTopButton';
 // helpers
-import { migrateContentToFirestore } from "~/script/migrateContent";
-import { doc, serverTimestamp, setDoc } from "firebase/firestore";
-import { firestore } from "~/lib/firebase";
+import { migrateContentToFirestore } from '~/script/migrateContent';
+import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
+import { firestore } from '~/lib/firebase';
 
 export default function LectureLayout() {
   const [currentUser, setCurrentUser] = useAtom(currentUserAtom); // Use useAtom for currentUser
@@ -30,7 +30,7 @@ export default function LectureLayout() {
 
   const lectureId = useParams().id;
 
-  const [headerTitle, setHeaderTitle] = useState("");
+  const [headerTitle, setHeaderTitle] = useState('');
 
   useEffect(() => {
     if (!lectureId || !contents) return;
@@ -97,15 +97,18 @@ export default function LectureLayout() {
               <SidebarTrigger />
               <div className="font-semibold">{headerTitle}</div>
             </div>
-            {/* 임시 마이그레이션 버튼 */}
+            {/* 임시 마이그레이션 버튼*/}
             <Button onClick={migrateContentToFirestore} variant="outline">
               Migrate Data
             </Button>
           </header>
 
-          <ScrollArea className="flex-1">
-            <main className="flex flex-col gap-4 items-center justify-center mx-auto max-w-4xl p-6 md:p-10">
-              <Contents lectureId={lectureId} onQuizComplete={handleQuizCompletion} />
+          <ScrollArea className="flex-1 h-full">
+            <main className="h-full flex flex-col gap-4 items-center justify-center mx-auto max-w-4xl p-6 md:p-10">
+              <Contents
+                lectureId={lectureId}
+                onQuizComplete={handleQuizCompletion}
+              />
               <ContentFooter />
             </main>
           </ScrollArea>

@@ -1,7 +1,7 @@
-import { Plus, Search, UserCog, Trash2 } from 'lucide-react';
-import { Input } from '~/components/ui/input';
-import { Dialog, DialogTrigger } from '~/components/ui/dialog';
-import { Button } from '~/components/ui/button';
+import { Plus, Search, UserCog, Trash2 } from "lucide-react";
+import { Input } from "~/components/ui/input";
+import { Dialog, DialogTrigger } from "~/components/ui/dialog";
+import { Button } from "~/components/ui/button";
 import {
   Table,
   TableBody,
@@ -9,19 +9,19 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '~/components/ui/table';
-import { Badge } from '~/components/ui/badge';
-import { useEffect, useState } from 'react'; // Import useEffect
-import { currentUserAtom, usersAtom, type User } from '~/data/userData';
-import UserForm from '~/components/UserForm';
-import { useAtom, useAtomValue } from 'jotai';
-import { Navigate } from 'react-router';
+} from "~/components/ui/table";
+import { Badge } from "~/components/ui/badge";
+import { useEffect, useState } from "react"; // Import useEffect
+import { currentUserAtom, usersAtom, type User } from "~/data/userData";
+import UserForm from "~/components/UserForm";
+import { useAtom, useAtomValue } from "jotai";
+import { Navigate } from "react-router";
 import {
   getAllUsers,
   addUserToFirestore,
   updateUserInFirestore,
   deleteUserFromFirestore,
-} from '~/lib/firestore_utils'; // Import CUD functions
+} from "~/lib/firestore_utils"; // Import CUD functions
 
 export default function UserManagementPage() {
   const [openAdd, setOpenAdd] = useState(false);
@@ -32,7 +32,7 @@ export default function UserManagementPage() {
   const currentUser = useAtomValue(currentUserAtom);
   const [users, setUsers] = useAtom(usersAtom); // Standard atom usage
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
 
   // Fetch users on component mount
   useEffect(() => {
@@ -43,8 +43,8 @@ export default function UserManagementPage() {
         const fetchedUsers = await getAllUsers();
         setUsers(fetchedUsers);
       } catch (err: any) {
-        console.error('Failed to fetch users:', err);
-        setError('사용자 정보를 불러오는데 실패했습니다.');
+        console.error("Failed to fetch users:", err);
+        setError("사용자 정보를 불러오는데 실패했습니다.");
         setUsers(null); // Clear users on error
       } finally {
         setIsLoading(false);
@@ -61,7 +61,7 @@ export default function UserManagementPage() {
   );
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('정말로 이 사용자를 삭제하시겠습니까?')) return;
+    if (!window.confirm("本当にこのユーザーを削除しますか？")) return;
 
     const prevUsers = users; // Store current state for potential rollback
 
@@ -72,10 +72,10 @@ export default function UserManagementPage() {
 
     try {
       await deleteUserFromFirestore(id);
-      alert('사용자가 성공적으로 삭제되었습니다.');
+      alert("ユーザーが正常に削除されました。");
     } catch (err: any) {
-      console.error('Failed to delete user:', err);
-      setError('사용자 삭제에 실패했습니다.');
+      console.error("ユーザー削除に失敗しました:", err);
+      setError("ユーザー削除に失敗しました。");
       setUsers(prevUsers); // Rollback optimistic update
     }
   };
@@ -102,15 +102,15 @@ export default function UserManagementPage() {
     try {
       if (isNewUser) {
         await addUserToFirestore(user);
-        alert('사용자가 성공적으로 추가되었습니다.');
+        alert("ユーザーが正常に追加されました。");
       } else {
         // For updates, send the UID and fields to update
         await updateUserInFirestore(user.uid, user);
-        alert('사용자 정보가 성공적으로 업데이트되었습니다.');
+        alert("ユーザー情報が正常に更新されました。");
       }
     } catch (err: any) {
-      console.error('Failed to save user:', err);
-      setError('사용자 정보 저장에 실패했습니다.');
+      console.error("ユーザー情報の保存に失敗しました:", err);
+      setError("ユーザー情報の保存に失敗しました。");
       setUsers(prevUsers); // Rollback optimistic update
     } finally {
       setOpenAdd(false);
@@ -122,11 +122,17 @@ export default function UserManagementPage() {
     return <Navigate to="/login" replace />;
   }
 
-  // Display loading/error states for the page
+  if (
+    currentUser?.authority !== "admin" &&
+    currentUser?.authority !== "instructor"
+  ) {
+    return <Navigate to="/" replace />;
+  }
+
   if (isLoading) {
     return (
       <div className="p-6 max-w-7xl mx-auto text-center text-lg">
-        사용자 정보를 불러오는 중...
+        ユーザー情報を読み込み中...
       </div>
     );
   }
@@ -134,7 +140,7 @@ export default function UserManagementPage() {
   if (error) {
     return (
       <div className="p-6 max-w-7xl mx-auto text-center text-red-500 text-lg">
-        에러: {error}
+        エラー: {error}
       </div>
     );
   }
@@ -143,7 +149,7 @@ export default function UserManagementPage() {
   if (!users) {
     return (
       <div className="p-6 max-w-7xl mx-auto text-center text-lg">
-        사용자 정보가 없습니다.
+        ユーザー情報が存在しません。
       </div>
     );
   }
@@ -151,7 +157,7 @@ export default function UserManagementPage() {
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-bold">User Management</h1>
+        <h1 className="text-2xl font-bold">ユーザー管理</h1>
 
         <div className="flex gap-2 w-full sm:w-auto">
           <div className="relative flex-1 sm:w-64">
@@ -167,7 +173,7 @@ export default function UserManagementPage() {
           <Dialog open={openAdd} onOpenChange={setOpenAdd}>
             <DialogTrigger asChild>
               <Button>
-                <Plus className="h-4 w-4 mr-2" /> Add User
+                <Plus className="h-4 w-4 mr-2" /> ユーザーを追加
               </Button>
             </DialogTrigger>
             <UserForm onSave={handleSave} />
@@ -204,11 +210,11 @@ export default function UserManagementPage() {
                 <TableCell>
                   <Badge
                     variant={
-                      user.authority === 'admin'
-                        ? 'default'
-                        : user.authority === 'instructor'
-                          ? 'secondary'
-                          : 'outline'
+                      user.authority === "admin"
+                        ? "default"
+                        : user.authority === "instructor"
+                          ? "secondary"
+                          : "outline"
                     }
                     className="capitalize"
                   >

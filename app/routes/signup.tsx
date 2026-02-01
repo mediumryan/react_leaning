@@ -1,21 +1,27 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router';
-import { Button } from '~/components/ui/button';
-import { Card } from '~/components/ui/card';
-import { Input } from '~/components/ui/input';
-import { Label } from '~/components/ui/label';
-import { signUp } from '~/lib/auth';
-import { firestore } from '~/lib/firebase';
-import { doc, setDoc } from 'firebase/firestore';
-import { useAtom } from 'jotai'; // Import useAtomValue
-import { contentsQueryAtom } from '~/data/contentData';
+// react
+import React, { useState } from "react";
+// react-router
+import { useNavigate } from "react-router";
+// atoms
+import { useAtom } from "jotai";
+import { contentsQueryAtom } from "~/data/contentData";
+// shadcn/ui
+import { Button } from "~/components/ui/button";
+import { Card } from "~/components/ui/card";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
+// firebase
+import { signUp } from "~/lib/auth";
+import { firestore } from "~/lib/firebase";
+import { doc, setDoc } from "firebase/firestore";
 
 const SignUp = () => {
   const navigate = useNavigate();
-  const [name, setName] = useState('');
-  const [nickname, setNickname] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+
+  const [name, setName] = useState("");
+  const [nickname, setNickname] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const [{ data: contents }] = useAtom(contentsQueryAtom);
@@ -25,7 +31,9 @@ const SignUp = () => {
     setError(null);
 
     if (!contents) {
-      setError('Content data is not yet loaded. Please try again.');
+      setError(
+        "コンテンツデータがまだ読み込まれていません。もう一度お試しください。",
+      );
       return;
     }
 
@@ -34,38 +42,37 @@ const SignUp = () => {
       const userCredential = await signUp(email, password);
       const user = userCredential.user;
 
-      if (!user) throw new Error('User creation failed');
+      if (!user) throw new Error("User creation failed");
 
       // 2. Firestore에 기본 유저 정보 저장 (contentStatus 제외)
-      await setDoc(doc(firestore, 'users', user.uid), {
+      await setDoc(doc(firestore, "users", user.uid), {
         name: name,
         nickname: nickname,
         email: email,
-        course: 'Beginner',
-        grade: 'Bronze',
+        course: "Beginner",
+        grade: "Bronze",
         exp: 0,
-        authority: 'user',
+        authority: "user",
       });
-
-      alert('회원가입 및 사용자 정보 저장 성공!');
-      navigate('/');
+      alert("サインアップに成功しました！ようこそ！");
+      navigate("/");
     } catch (err: any) {
       setError(err.message);
-      alert(`회원가입 실패: ${err.message}`);
+      alert(`サインアップに失敗しました: ${err.message}`);
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <Card className="p-8 w-full max-w-sm shadow-lg">
-        <h1 className="text-2xl font-bold mb-6 text-center">회원가입</h1>
+        <h1 className="text-2xl font-bold mb-6 text-center">Sign Up</h1>
         <form onSubmit={handleSignUp} className="space-y-4">
           <div>
-            <Label htmlFor="name">이름</Label>
+            <Label htmlFor="name">Name</Label>
             <Input
               id="name"
               type="text"
-              placeholder="홍길동"
+              placeholder="REACT TARO"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -73,11 +80,11 @@ const SignUp = () => {
             />
           </div>
           <div>
-            <Label htmlFor="nickname">닉네임</Label>
+            <Label htmlFor="nickname">Nickname</Label>
             <Input
               id="nickname"
               type="text"
-              placeholder="길동"
+              placeholder="React Machine"
               value={nickname}
               onChange={(e) => setNickname(e.target.value)}
               required
@@ -85,7 +92,8 @@ const SignUp = () => {
             />
           </div>
           <div>
-            <Label htmlFor="email">이메일</Label>
+            <Label htmlFor="email">Email</Label>
+
             <Input
               id="email"
               type="email"
@@ -96,8 +104,11 @@ const SignUp = () => {
               className="mt-1"
             />
           </div>
+          <Label className="text-red-400 text-xs">
+            *必ず実在するメールアドレスを入力してください。
+          </Label>
           <div>
-            <Label htmlFor="password">비밀번호 (6자리 이상)</Label>
+            <Label htmlFor="password">Password (6文字以上)</Label>
             <Input
               id="password"
               type="password"
@@ -112,7 +123,7 @@ const SignUp = () => {
           {error && <p className="text-red-500 text-sm">{error}</p>}
 
           <Button type="submit" className="w-full mt-4">
-            회원가입
+            Submit
           </Button>
         </form>
       </Card>

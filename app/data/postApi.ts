@@ -11,8 +11,14 @@ import {
   Timestamp,
   setDoc,
 } from "firebase/firestore";
-import { firestore } from "~/lib/firebase";
+import { firestore, storage } from "~/lib/firebase";
 import type { PostType } from "./postData";
+import { deleteObject, ref } from "firebase/storage";
+
+export const deleteImageByUrl = async (imageUrl: string) => {
+  const imageRef = ref(storage, imageUrl);
+  await deleteObject(imageRef);
+};
 
 export const getPosts = async (
   currentUserId?: string,
@@ -36,27 +42,30 @@ export const getPosts = async (
       content: data.content,
       projectLink: data.projectLink,
       imageUrl: data.imageUrl,
-      like: data.likeCount || likedUserIds.length,
+      likeCount: data.likeCount || likedUserIds.length,
       name: data.name,
       createdAt: data.createdAt.toDate(),
       isLiked: currentUserId ? likedUserIds.includes(currentUserId) : false,
+      userId: data.userId,
     });
   }
 
   if (postOrder === "new") {
     posts.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   } else if (postOrder === "popular") {
-    posts.sort((a, b) => b.like - a.like);
+    posts.sort((a, b) => b.likeCount - a.likeCount);
   }
 
   return posts;
 };
 
 export const addPost = async (
-  post: Omit<PostType, "id" | "createdAt" | "like" | "isLiked">,
+  post: Omit<PostType, "id" | "createdAt" | "likeCount" | "isLiked">,
+  userId: string,
 ) => {
   const newPost = {
     ...post,
+    userId: userId,
     createdAt: Timestamp.now(),
     likeCount: 0,
   };
@@ -66,28 +75,48 @@ export const addPost = async (
   return {
     ...newPost,
     id: docRef.id,
-    like: 0,
+    likeCount: 0,
     isLiked: false,
   };
 };
 
 export const updatePost = async (
   id: string,
+  prevPost: PostType,
   post: Partial<Omit<PostType, "id">>,
 ) => {
   const postRef = doc(firestore, "posts", id);
+
+  // 1️⃣ 이미지가 변경되었을 경우
+  if (prevPost.imageUrl && post.imageUrl !== prevPost.imageUrl) {
+    try {
+      await deleteImageByUrl(prevPost.imageUrl);
+    } catch (e) {
+      console.warn("기존 이미지 삭제 실패", e);
+    }
+  }
+
+  // 2️⃣ Firestore 업데이트
   await updateDoc(postRef, post);
 };
 
-export const deletePost = async (id: string) => {
-  const postRef = doc(firestore, "posts", id);
+export const deletePost = async (post: PostType) => {
+  // 1️⃣ 이미지 삭제
+  if (post.imageUrl) {
+    try {
+      await deleteImageByUrl(post.imageUrl);
+    } catch (e) {
+      console.warn("이미지 삭제 실패", e);
+    }
+  }
+
+  // 2️⃣ Firestore 문서 삭제
+  const postRef = doc(firestore, "posts", post.id);
   await deleteDoc(postRef);
 };
 
 export const likePost = async (postId: string, userId: string) => {
   if (!userId) return;
-
-  console.log("likePost called with postId:", postId, "userId:", userId);
 
   const postRef = doc(firestore, "posts", postId);
   const likeRef = doc(collection(postRef, "likes"), userId);

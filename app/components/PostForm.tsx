@@ -9,20 +9,33 @@ import { Textarea } from "~/components/ui/textarea";
 import { Label } from "~/components/ui/label";
 // helpers
 import { confirm } from "~/helper/confirm";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { storage } from "~/lib/firebase";
+import { validateImageFile } from "~/helper/helper";
+import { Badge } from "./ui/badge";
+import { useAtomValue } from "jotai";
+import { currentUserAtom } from "~/data/userData";
 
 interface PostFormProps {
   editPost: PostType | null;
   onClose: () => void;
   onSave: (
-    post: Omit<PostType, "id" | "createdAt" | "like" | "likedUsers">,
+    post: Omit<PostType, "id" | "createdAt" | "likeCount" | "likedUsers"> & {
+      userId: string;
+    },
   ) => void;
 }
+
+const MAX_IMAGE_SIZE_MB = 0.5;
+const ALLOWED_IMAGE_TYPES = ["jpeg", "png", "webp"];
 
 export default function PostForm({ editPost, onClose, onSave }: PostFormProps) {
   const [title, setTitle] = useState(editPost?.title || "");
   const [content, setContent] = useState(editPost?.content || "");
   const [projectLink, setProjectLink] = useState(editPost?.projectLink || "");
-  const [imageUrl, setImageUrl] = useState(editPost?.imageUrl || "");
+  const [imageFile, setImageFile] = useState<File | null>(null);
+
+  const currentUser = useAtomValue(currentUserAtom);
 
   const handleSave = async () => {
     if (!title.trim()) {
@@ -34,25 +47,56 @@ export default function PostForm({ editPost, onClose, onSave }: PostFormProps) {
       return;
     }
 
+    let imageUrl: string | null;
+
+    // 🔥 이미지 업로드
+    if (imageFile) {
+      const imageRef = ref(storage, `posts/${Date.now()}_${imageFile.name}`);
+
+      await uploadBytes(imageRef, imageFile);
+      imageUrl = await getDownloadURL(imageRef);
+    } else {
+      imageUrl = null;
+    }
+
     onSave({
       title,
       content,
       projectLink,
       imageUrl,
-      name: "Anonymous", // or get from auth
+      name: currentUser?.nickname || "Anonymous",
+      userId: currentUser?.uid || "Anonymous",
     });
 
     onClose();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const error = validateImageFile(file);
+    if (error) {
+      await confirm({
+        icon: 0,
+        message: error,
+        size: "sm",
+      });
+      e.target.value = ""; // 같은 파일 다시 선택 가능하게
+      return;
+    }
+
+    setImageFile(file);
   };
 
   return (
     <div className="space-y-4">
       {/* 제목 */}
       <div className="space-y-1">
-        <Label htmlFor="title">제목</Label>
+        <Label htmlFor="title">タイトル</Label>
         <Input
           id="title"
-          placeholder="제목을 입력하세요"
+          placeholder="タイトルを入力してください"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
@@ -60,10 +104,10 @@ export default function PostForm({ editPost, onClose, onSave }: PostFormProps) {
 
       {/* 내용 */}
       <div className="space-y-1">
-        <Label htmlFor="content">내용</Label>
+        <Label htmlFor="content">内容</Label>
         <Textarea
           id="content"
-          placeholder="게시글 내용을 입력하세요"
+          placeholder="内容を入力してください"
           value={content}
           onChange={(e) => setContent(e.target.value)}
           rows={4}
@@ -72,7 +116,7 @@ export default function PostForm({ editPost, onClose, onSave }: PostFormProps) {
 
       {/* 프로젝트 링크 */}
       <div className="space-y-1">
-        <Label htmlFor="projectLink">프로젝트 링크</Label>
+        <Label htmlFor="projectLink">プロジェクトリンク</Label>
         <Input
           id="projectLink"
           placeholder="https://"
@@ -81,23 +125,36 @@ export default function PostForm({ editPost, onClose, onSave }: PostFormProps) {
         />
       </div>
 
-      {/* 이미지 URL */}
-      <div className="space-y-1">
-        <Label htmlFor="imageUrl">이미지 URL</Label>
+      <div className="space-y-2">
+        <Label htmlFor="image">プレビューイメージ</Label>
+
         <Input
-          id="imageUrl"
-          placeholder="이미지 URL (선택)"
-          value={imageUrl}
-          onChange={(e) => setImageUrl(e.target.value)}
+          id="image"
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          onChange={handleFileChange}
         />
+
+        {/* helper text */}
+        <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+          <span>アップロード制限:</span>
+
+          <Badge variant="secondary">{MAX_IMAGE_SIZE_MB}MB 以下</Badge>
+
+          {ALLOWED_IMAGE_TYPES.map((type) => (
+            <Badge key={type} variant="outline">
+              {type}
+            </Badge>
+          ))}
+        </div>
       </div>
 
       {/* 버튼 영역 */}
       <div className="flex justify-end gap-2 pt-2">
         <Button variant="outline" onClick={onClose}>
-          취소
+          キャンセル
         </Button>
-        <Button onClick={handleSave}>{editPost ? "수정" : "저장"}</Button>
+        <Button onClick={handleSave}>{editPost ? "修正" : "保存"}</Button>
       </div>
     </div>
   );

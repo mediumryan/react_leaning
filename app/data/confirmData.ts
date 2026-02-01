@@ -1,9 +1,9 @@
-import { atom } from 'jotai';
+import { atom } from "jotai";
 
 export type ConfirmOptions = {
   icon: number;
   message: string;
-  size: 'sm' | 'default';
+  size: "sm" | "default";
 };
 
 type ConfirmState = {
@@ -15,8 +15,8 @@ type ConfirmState = {
 export const confirmAtom = atom<ConfirmState>({
   open: false,
   options: {
-    message: '',
+    message: "",
     icon: 0,
-    size: 'sm',
+    size: "sm",
   },
 });

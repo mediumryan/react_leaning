@@ -1,25 +1,24 @@
-import { useState } from 'react';
-import type { MultipleChoiceQuiz, ShortAnswerQuiz } from '~/data/contentData';
-import { Button } from './ui/button';
+import type { MultipleChoiceQuiz, ShortAnswerQuiz } from "~/data/contentData";
+import { Button } from "./ui/button";
 import {
   Field,
   FieldDescription,
   FieldLabel,
   FieldLegend,
   FieldSet,
-} from './ui/field';
-import { Input } from './ui/input';
-import { RadioGroup, RadioGroupItem } from './ui/radio-group';
-import { cn } from '~/lib/utils'; // Assuming cn for utility classes
-import { checkShortAnswer } from '~/helper/helper'; // Import the helper
-import { useAtom } from 'jotai';
+} from "./ui/field";
+import { Input } from "./ui/input";
+import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
+import { cn } from "~/lib/utils"; // Assuming cn for utility classes
+import { checkShortAnswer } from "~/helper/helper"; // Import the helper
+import { useAtom } from "jotai";
 import {
   displayedCorrectAnswerAtom,
   isCorrectAtom,
   isSubmittedAtom,
   showFeedbackAtom,
   userAnswersAtom,
-} from '~/data/quizData';
+} from "~/data/quizData";
 
 interface ContentQuizProps {
   quiz: MultipleChoiceQuiz | ShortAnswerQuiz;
@@ -70,11 +69,11 @@ export default function ContentQuiz({
   };
 
   const handleRetry = () => {
-    setUserAnswer('');
+    setUserAnswer("");
     setIsSubmitted(false);
     setIsCorrect(false);
     setShowFeedback(false);
-    setDisplayedCorrectAnswer('');
+    setDisplayedCorrectAnswer("");
   };
 
   const isButtonDisabled = !userAnswer || (isSubmitted && isCorrect);
@@ -92,20 +91,24 @@ export default function ContentQuiz({
           >
             {quiz.options.map((option, index) => (
               <Field orientation="horizontal" key={index}>
-                <RadioGroupItem value={option} id={`${quiz.id}-${index}`} />
+                <RadioGroupItem
+                  value={option}
+                  id={`${quiz.id}-${index}`}
+                  className="bg-white"
+                />
                 <FieldLabel
                   htmlFor={`${quiz.id}-${index}`}
                   className={cn(
-                    'font-normal',
+                    "font-normal",
                     showFeedback &&
                       isSubmitted &&
                       index === quiz.correctAnswerIndex &&
-                      'text-green-600 font-bold',
+                      "text-green-600 font-bold",
                     showFeedback &&
                       isSubmitted &&
                       !isCorrect &&
                       option === userAnswer &&
-                      'text-red-600',
+                      "text-red-600",
                   )}
                 >
                   {option}
@@ -124,9 +127,9 @@ export default function ContentQuiz({
           <Input
             id={`quiz-input-${quiz.id}`}
             className={cn(
-              'max-w-sm',
-              showFeedback && isSubmitted && isCorrect && 'border-green-500',
-              showFeedback && isSubmitted && !isCorrect && 'border-red-500',
+              "max-w-sm bg-white",
+              showFeedback && isSubmitted && isCorrect && "border-green-500",
+              showFeedback && isSubmitted && !isCorrect && "border-red-500",
             )}
             type="text"
             placeholder="解答を入力してください"
@@ -148,11 +151,11 @@ export default function ContentQuiz({
       {showFeedback && isSubmitted && (
         <p
           className={cn(
-            'text-lg font-semibold mt-4',
-            isCorrect ? 'text-green-600' : 'text-red-600',
+            "text-lg font-semibold mt-4",
+            isCorrect ? "text-green-600" : "text-red-600",
           )}
         >
-          {isCorrect ? '正解です！' : '残念、不正解です。'}
+          {isCorrect ? "正解です！" : "残念、不正解です。"}
         </p>
       )}
 
@@ -161,7 +164,7 @@ export default function ContentQuiz({
         onClick={isSubmitted && !isCorrect ? handleRetry : handleSubmit}
         disabled={isButtonDisabled}
       >
-        {isSubmitted && !isCorrect ? '再試行' : '提出'}
+        {isSubmitted && !isCorrect ? "再試行" : "提出"}
       </Button>
     </div>
   );
