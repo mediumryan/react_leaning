@@ -1,13 +1,22 @@
-import { Button } from './ui/button';
-import { ArrowUp } from 'lucide-react';
+import { useEffect } from "react";
+import { Button } from "./ui/button";
+import { ArrowUp } from "lucide-react";
+import { useParams } from "react-router";
 
 export default function GoTopButton() {
+  const lectureId = useParams().id;
+
   const handleClick = () => {
-    const parent = document.getElementById('content-scroll');
-    if (parent) {
-      parent.scrollTo({ top: 0, behavior: 'smooth' });
+    const scrollView = document.getElementById("contentScroll");
+    if (scrollView) {
+      scrollView.scrollIntoView({ block: "start", behavior: "smooth" });
     }
   };
+
+  useEffect(() => {
+    if (!lectureId) return;
+    handleClick();
+  }, [lectureId]);
 
   return (
     <Button

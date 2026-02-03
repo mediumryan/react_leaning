@@ -1,5 +1,5 @@
 // react
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 // react-router
 import { Link, useParams } from "react-router";
 // atoms
@@ -30,9 +30,13 @@ import {
 } from "~/helper/helper";
 
 export function AppSidebar() {
-  const contentId = useParams().id;
+  const lectureId = useParams().id;
+
+  const sideBarItemRef = useRef<HTMLLIElement>(null);
+
   const currentUser = useAtomValue(currentUserAtom);
-  const [{ data: contents }] = useAtom(contentsQueryAtom);
+  // const [{ data: contents }] = useAtom(contentsQueryAtom);
+  const contents = useAtomValue(contentsQueryAtom);
 
   const [progress, setProgress] = useState(0);
 
@@ -47,6 +51,15 @@ export function AppSidebar() {
     );
     setProgress(calculatedProgress);
   }, [currentUser, contents]);
+
+  useEffect(() => {
+    if (!sideBarItemRef.current) return;
+
+    sideBarItemRef.current.scrollIntoView({
+      block: "center",
+      behavior: "smooth",
+    });
+  }, [lectureId]);
 
   if (!contents) {
     return (
@@ -79,11 +92,15 @@ export function AppSidebar() {
             <SidebarGroupContent>
               <SidebarMenu>
                 {section.map((content) => (
-                  <SidebarMenuItem key={content.id} className="px-2">
+                  <SidebarMenuItem
+                    key={content.id}
+                    ref={lectureId === content.id ? sideBarItemRef : null}
+                    className="px-2"
+                  >
                     <Link to={`/contents/${content.id}`}>
                       <SidebarMenuButton
                         className={`${
-                          contentId === content.id
+                          lectureId === content.id
                             ? "bg-blue-400 text-white"
                             : ""
                         } `}

@@ -1,6 +1,12 @@
-import type { Content } from "~/data/contentData";
-import { ALLOWED_TYPES, MAX_FILE_SIZE } from "~/data/postData";
-import type { User } from "~/data/userData";
+import type { Content } from '~/data/contentData';
+import { ALLOWED_TYPES, MAX_FILE_SIZE } from '~/data/postData';
+import type { User } from '~/data/userData';
+// images
+import branzeBadge from '~/assets/images/grades/bronze.png';
+import silverBadge from '~/assets/images/grades/silver.png';
+import goldBadge from '~/assets/images/grades/gold.png';
+import platinumBadge from '~/assets/images/grades/platinum.png';
+import diamondBadge from '~/assets/images/grades/diamond.png';
 
 export const getFirstContentId = (contentList: Content[]) => {
   if (contentList.length === 0) return null;
@@ -51,15 +57,25 @@ export const getPreviousContentId = (
 export const mappingTitlebySection = (section: number) => {
   switch (section) {
     case 1:
-      return "Section 1";
+      return 'Section 1 : What is React?';
     case 2:
-      return "Section 2";
+      return 'Section 2 : Basic React Concepts';
     case 3:
-      return "Section 3";
+      return 'Section 3 : State';
     case 4:
-      return "Section 4";
+      return 'Section 4 : Props';
+    case 5:
+      return 'Section 5 : Events';
+    case 6:
+      return 'Section 6 : Lists / Objects';
+    case 7:
+      return 'Section 7 : Forms';
+    case 8:
+      return 'Section 8 : Todo List Project';
+    case 9:
+      return '*Bonus : Lifecycle';
     default:
-      return "";
+      return '';
   }
 };
 
@@ -93,7 +109,7 @@ export const checkShortAnswer = (
   userAnswer: string,
 ) => {
   const possibleAnswers = correctAnswerString
-    .split(",")
+    .split(',,')
     .map((ans) => ans.trim().toLowerCase());
 
   const normalizedUserAnswer = userAnswer.trim().toLowerCase();
@@ -101,49 +117,51 @@ export const checkShortAnswer = (
   const isCorrect = possibleAnswers.some((ans) => ans === normalizedUserAnswer);
 
   // Return the first possible answer for feedback
-  const firstCorrectAnswer = possibleAnswers[0] || "";
+  const firstCorrectAnswer = possibleAnswers[0] || '';
 
   return { isCorrect, firstCorrectAnswer };
 };
 
 export const validateImageFile = (file: File) => {
   if (!ALLOWED_TYPES.includes(file.type)) {
-    return "JPEG, PNG, WEBP 形式の画像のみアップロード可能です。";
+    return 'JPEG, PNG, WEBP 形式の画像のみアップロード可能です。';
   }
 
   if (file.size > MAX_FILE_SIZE) {
-    return "画像のサイズは5MB以下でなければなりません。";
+    return '画像のサイズは5MB以下でなければなりません。';
   }
 
   return null;
 };
 
-export const getUserBorderColorByClass = (grade: string) => {
+export const getUserMedal = (grade: string) => {
   switch (grade) {
-    case "Bronze":
-      return "border-orange-950";
-    case "Silver":
-      return "border-gray-500";
-    case "Gold":
-      return "border-yellow-400";
-    case "Platinum":
-      return "border-cyan-400";
+    case 'Bronze':
+      return branzeBadge;
+    case 'Silver':
+      return silverBadge;
+    case 'Gold':
+      return goldBadge;
+    case 'Platinum':
+      return platinumBadge;
+    case 'Diamond':
+      return diamondBadge;
     default:
-      return "border-gray-100";
+      return '';
   }
 };
 
 export const getUserColorByClass = (grade: string) => {
   switch (grade) {
-    case "Bronze":
-      return "text-orange-950";
-    case "Silver":
-      return "text-gray-500";
-    case "Gold":
-      return "text-yellow-400";
-    case "Platinum":
-      return "text-cyan-400";
+    case 'Bronze':
+      return 'text-orange-950';
+    case 'Silver':
+      return 'text-gray-500';
+    case 'Gold':
+      return 'text-yellow-400';
+    case 'Platinum':
+      return 'text-cyan-400';
     default:
-      return "text-gray-100";
+      return 'text-gray-100';
   }
 };

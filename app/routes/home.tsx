@@ -31,7 +31,8 @@ export function meta({}: Route.MetaArgs) {
 export default function Home() {
   const navigate = useNavigate();
   const currentUser = useAtomValue(currentUserAtom);
-  const [{ data: contents }] = useAtom(contentsQueryAtom);
+  // const [{ data: contents }] = useAtom(contentsQueryAtom);
+  const contents = useAtomValue(contentsQueryAtom);
 
   const handleClick = () => {
     if (contents) {

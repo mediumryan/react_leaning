@@ -208,3 +208,58 @@ I0201 18:55:35.487878    1105 load.go:109] Finished reloading
  {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0201 18:55:35.786387    1105 engine.go:156] [/emulator/react-learning 76bd] ExecuteGraphqlRead IntrospectionQuery: succeeded. \n"}}
 [debug] [2026-02-01T09:55:36.255Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects 200
 [debug] [2026-02-01T09:55:36.255Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects [omitted]
+[info] [Firebase Plugin] Stopping Data Connect toolkit
+[warn] ⚠  Data Connect Emulator has exited upon receiving signal: SIGINT 
+[debug] [2026-02-03T09:41:16.914Z] [Firebase Plugin] Activating Firebase extension.
+[debug] [2026-02-03T09:41:20.263Z] [Firebase Plugin] requireAuthWrapper
+[debug] [2026-02-03T09:41:20.264Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-02-03T09:41:20.264Z] > authorizing via signed-in user (straightwind0726@gmail.com)
+[debug] [2026-02-03T09:41:20.265Z] Checked if tokens are valid: false, expires at: 1769943334490
+[debug] [2026-02-03T09:41:20.265Z] Checked if tokens are valid: false, expires at: 1769943334490
+[debug] [2026-02-03T09:41:20.265Z] > refreshing access token with scopes: []
+[debug] [2026-02-03T09:41:20.266Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-02-03T09:41:20.266Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-02-03T09:41:20.270Z] [Firebase Plugin] VSCode notification server listening on port 40001
+[info] [Firebase Plugin] Starting Data Connect toolkit (version 3.1.1) on port 50001
+[info] i  dataconnect: downloading dataconnect-emulator-3.1.1... {"metadata":{"emulator":{"name":"dataconnect"},"message":"downloading dataconnect-emulator-3.1.1..."}}
+[debug] [2026-02-03T09:41:21.117Z] >>> [apiv2][query] GET https://storage.googleapis.com/firemat-preview-drop/emulator/dataconnect-emulator-macos-arm64-v3.1.1 
+[debug] [2026-02-03T09:41:21.564Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-02-03T09:41:21.564Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-02-03T09:41:21.636Z] [Firebase Plugin] User found:  straightwind0726@gmail.com
+[info] [Firebase Plugin] (Core:Project) New user detected, fetching projects
+[debug] [2026-02-03T09:41:21.637Z] Checked if tokens are valid: true, expires at: 1770115280564
+[debug] [2026-02-03T09:41:21.638Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects pageSize=1000
+[debug] [2026-02-03T09:41:22.569Z] <<< [apiv2][status] GET https://storage.googleapis.com/firemat-preview-drop/emulator/dataconnect-emulator-macos-arm64-v3.1.1 200
+[debug] [2026-02-03T09:41:22.570Z] <<< [apiv2][body] GET https://storage.googleapis.com/firemat-preview-drop/emulator/dataconnect-emulator-macos-arm64-v3.1.1 [stream]
+[debug] [2026-02-03T09:41:23.328Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects 200
+[debug] [2026-02-03T09:41:23.329Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects [omitted]
+[info] i  dataconnect: Removing outdated emulator files: dataconnect-emulator-3.1.0 {"metadata":{"emulator":{"name":"dataconnect"},"message":"Removing outdated emulator files: dataconnect-emulator-3.1.0"}}
+[debug] [2026-02-03T09:41:44.041Z] I0203 18:41:44.030749    1255 control.go:100] [/emulator/react-learning 38fd] UpdateResources(): done
+Main schema: sources: schema/schema.gql [1992B] 
+Connector "example": sources: example/mutations.gql [1243B] example/queries.gql [1801B] 
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0203 18:41:44.030749    1255 control.go:100] [/emulator/react-learning 38fd] UpdateResources(): done\nMain schema: sources: schema/schema.gql [1992B] \nConnector \"example\": sources: example/mutations.gql [1243B] example/queries.gql [1801B] \n"}}
+[debug] [2026-02-03T09:41:44.041Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"dataconnect"},"message":"Ignoring unsupported arg: auto_download"}}
+[debug] [2026-02-03T09:41:44.042Z] Ignoring unsupported arg: port {"metadata":{"emulator":{"name":"dataconnect"},"message":"Ignoring unsupported arg: port"}}
+[debug] [2026-02-03T09:41:44.042Z] Starting Data Connect Emulator with command {"binary":"/Users/ryan/.cache/firebase/emulators/dataconnect-emulator-3.1.1","args":["--logtostderr","-v=2","dev","--listen=localhost:50001","--config_dir=/Users/ryan/Desktop/Projects/React/React_Learning/dataconnect","--enable_output_schema_extensions=true","--enable_output_generated_sdk=true"],"optionalArgs":["listen","config_dir","enable_output_schema_extensions","enable_output_generated_sdk"],"joinArgs":true,"shell":false,"port":9399} {"metadata":{"emulator":{"name":"dataconnect"},"message":"Starting Data Connect Emulator with command {\"binary\":\"/Users/ryan/.cache/firebase/emulators/dataconnect-emulator-3.1.1\",\"args\":[\"--logtostderr\",\"-v=2\",\"dev\",\"--listen=localhost:50001\",\"--config_dir=/Users/ryan/Desktop/Projects/React/React_Learning/dataconnect\",\"--enable_output_schema_extensions=true\",\"--enable_output_generated_sdk=true\"],\"optionalArgs\":[\"listen\",\"config_dir\",\"enable_output_schema_extensions\",\"enable_output_generated_sdk\"],\"joinArgs\":true,\"shell\":false,\"port\":9399}"}}
+[info] i  dataconnect: Data Connect Emulator logging to dataconnect-debug.log {"metadata":{"emulator":{"name":"dataconnect"},"message":"Data Connect Emulator logging to dataconnect-debug.log"}}
+[debug] [2026-02-03T09:41:44.054Z] I0203 18:41:44.054553    1257 load.go:31] Reloading schema and connectors...
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0203 18:41:44.054553    1257 load.go:31] Reloading schema and connectors...\n"}}
+[debug] [2026-02-03T09:41:44.074Z] I0203 18:41:44.074176    1257 control.go:100] [/emulator/react-learning e88d] UpdateResources(): done
+Main schema: sources: schema/schema.gql [1992B] 
+Connector "example": sources: example/mutations.gql [1243B] example/queries.gql [1801B] 
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0203 18:41:44.074176    1257 control.go:100] [/emulator/react-learning e88d] UpdateResources(): done\nMain schema: sources: schema/schema.gql [1992B] \nConnector \"example\": sources: example/mutations.gql [1243B] example/queries.gql [1801B] \n"}}
+[debug] [2026-02-03T09:41:44.093Z] I0203 18:41:44.093223    1257 codegen.go:80] [connector "example" javascriptSdk] Generating sources into "/Users/ryan/Desktop/Projects/React/React_Learning/src/dataconnect-generated"
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0203 18:41:44.093223    1257 codegen.go:80] [connector \"example\" javascriptSdk] Generating sources into \"/Users/ryan/Desktop/Projects/React/React_Learning/src/dataconnect-generated\"\n"}}
+[debug] [2026-02-03T09:41:44.100Z] I0203 18:41:44.100446    1257 collector.go:107] schema extensions wrote into "/Users/ryan/Desktop/Projects/React/React_Learning/dataconnect/.dataconnect/schema"
+Generated sources: main/mutation.gql [13679B] prelude.gql [73281B] main/implicit.gql [1261B] main/input.gql [28173B] main/relation.gql [14318B] main/query.gql [5099B] 
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0203 18:41:44.100446    1257 collector.go:107] schema extensions wrote into \"/Users/ryan/Desktop/Projects/React/React_Learning/dataconnect/.dataconnect/schema\"\nGenerated sources: main/mutation.gql [13679B] prelude.gql [73281B] main/implicit.gql [1261B] main/input.gql [28173B] main/relation.gql [14318B] main/query.gql [5099B] \n"}}
+[debug] [2026-02-03T09:41:44.102Z] I0203 18:41:44.102325    1257 collector.go:107] connector "example" javascriptSdk wrote into "/Users/ryan/Desktop/Projects/React/React_Learning/src/dataconnect-generated"
+Generated sources: react/esm/package.json [17B] react/esm/index.esm.js [3269B] react/README.md [48299B] .guides/setup.md [1682B] index.d.ts [8025B] react/index.cjs.js [3439B] index.cjs.js [4054B] README.md [40931B] react/index.d.ts [3961B] .guides/usage.md [3489B] .guides/config.json [236B] esm/index.esm.js [3564B] esm/package.json [17B] package.json [863B] react/package.json [460B] 
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0203 18:41:44.102325    1257 collector.go:107] connector \"example\" javascriptSdk wrote into \"/Users/ryan/Desktop/Projects/React/React_Learning/src/dataconnect-generated\"\nGenerated sources: react/esm/package.json [17B] react/esm/index.esm.js [3269B] react/README.md [48299B] .guides/setup.md [1682B] index.d.ts [8025B] react/index.cjs.js [3439B] index.cjs.js [4054B] README.md [40931B] react/index.d.ts [3961B] .guides/usage.md [3489B] .guides/config.json [236B] esm/index.esm.js [3564B] esm/package.json [17B] package.json [863B] react/package.json [460B] \n"}}
+[debug] [2026-02-03T09:41:44.103Z] I0203 18:41:44.103362    1257 installsdk.go:55] Package @dataconnect/generated is already installed. Skipping installation
+I0203 18:41:44.103382    1257 load.go:109] Finished reloading
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0203 18:41:44.103362    1257 installsdk.go:55] Package @dataconnect/generated is already installed. Skipping installation\nI0203 18:41:44.103382    1257 load.go:109] Finished reloading\n"}}
+[debug] [2026-02-03T09:41:44.104Z] I0203 18:41:44.104123    1257 dev.go:104] Listening on address (HTTP + gRPC): 127.0.0.1:50001
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0203 18:41:44.104123    1257 dev.go:104] Listening on address (HTTP + gRPC): 127.0.0.1:50001\n"}}
+[debug] [2026-02-03T09:41:44.355Z] I0203 18:41:44.355595    1257 engine.go:205] [/emulator/react-learning e88d] ExecuteGraphqlRead IntrospectionQuery: succeeded. 
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0203 18:41:44.355595    1257 engine.go:205] [/emulator/react-learning e88d] ExecuteGraphqlRead IntrospectionQuery: succeeded. \n"}}

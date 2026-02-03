@@ -24,6 +24,22 @@ a {
   cursor: pointer;
 }
 
+ul {
+  padding-left: 2rem;
+}
+
+ul[data-sidebar] {
+  padding-left: 0;
+}
+
+li {
+  list-style: square;
+}
+
+li[data-sidebar] {
+  list-style: none;
+}
+
 div[data-radix-scroll-area-viewport] > div {
   height: 100%;
 }
