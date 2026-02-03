@@ -1,4 +1,4 @@
-import{m as n}from"./button-BLTjC7jM.js";const t=[{type:0,section:1,order:0,id:"section1-orientation",title:"강의 시작하기: 무엇을 만들게 될까요?",exp:5,isComplete:!1,content:`안녕하세요 👋
+import{m as n}from"./button-CAZCDkQr.js";const t=[{type:0,section:1,order:0,id:"section1-orientation",title:"강의 시작하기: 무엇을 만들게 될까요?",exp:5,isComplete:!1,content:`안녕하세요 👋
 
 이 강의에 오신 것을 환영합니다.
 
