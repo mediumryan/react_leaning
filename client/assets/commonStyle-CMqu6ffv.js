@@ -1,0 +1,1 @@
+const t="scroll-m-20 text-center text-4xl font-extrabold tracking-tight text-balance",o="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0",e="scroll-m-20 text-2xl font-semibold tracking-tight";export{t as H,e as a,o as b};

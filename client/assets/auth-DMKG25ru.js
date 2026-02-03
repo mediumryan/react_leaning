@@ -1,0 +1,1 @@
+import{t as i,G as o,H as u,I as e,J as l,K as g,e as n,g as c}from"./button-BLTjC7jM.js";import{h as f}from"./firestore_utils-DDjvgd02.js";const m=(t,s)=>u(e,t,s),A=(t,s)=>o(e,t,s),p=()=>g(e),a=i();let r=!1;function I(){r||(r=!0,l(e,async t=>{if(t){const s=await f(t.uid);a.set(n,s)}else a.set(n,null);a.set(c,!1)}))}export{m as a,I as i,p as l,A as s};
