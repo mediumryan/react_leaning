@@ -36,10 +36,19 @@ export default function Contents({ lectureId, onQuizComplete }: ContentsProps) {
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
             components={{
+              h1({ children, ...props }) {
+                return (
+                  <h1
+                    className="text-2xl font-bold mb-6 text-blue-500"
+                    {...props}
+                  >
+                    {children}
+                  </h1>
+                );
+              },
               code({ className, children }) {
                 const match = /language-(\w+)/.exec(className || '');
                 return match ? (
-                  // 코드 (```)
                   <SyntaxHighlighter
                     style={nord}
                     language={match[1]}
@@ -61,7 +70,6 @@ export default function Contents({ lectureId, onQuizComplete }: ContentsProps) {
                   </SyntaxHighlighter>
                 );
               },
-              // 인용문 (>)
               blockquote({ children, ...props }) {
                 return (
                   <blockquote

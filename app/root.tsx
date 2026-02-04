@@ -17,10 +17,11 @@ import { HeaderMenu } from "./components/HeaderMenu";
 import { CommonAlert } from "./components/ConfirmDialog";
 import { BackgroundSpinner } from "./components/BackgroundSpinner";
 // atoms
-import { useAtomValue } from "jotai";
+import { Provider, useAtomValue } from "jotai";
 import { authLoadingAtom, currentUserAtom } from "./data/userData";
 // firebase
 import { initAuthListener } from "./lib/auth";
+import { appStore } from "./data/store";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -62,12 +63,20 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  const loading = useAtomValue(authLoadingAtom);
-  const currentUser = useAtomValue(currentUserAtom);
-
   useEffect(() => {
     initAuthListener();
   }, []);
+
+  return (
+    <Provider store={appStore}>
+      <AppContent />
+    </Provider>
+  );
+}
+
+function AppContent() {
+  const loading = useAtomValue(authLoadingAtom);
+  const currentUser = useAtomValue(currentUserAtom);
 
   if (loading) {
     return <BackgroundSpinner />;

@@ -1,14 +1,14 @@
 // react
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from 'react';
 // react-router
-import { Link, useParams } from "react-router";
+import { Link, useParams } from 'react-router';
 // atoms
-import { useAtom, useAtomValue } from "jotai";
-import { currentUserAtom } from "~/data/userData";
-import { contentsQueryAtom } from "~/data/contentData";
+import { useAtom, useAtomValue } from 'jotai';
+import { currentUserAtom } from '~/data/userData';
+import { contentsQueryAtom } from '~/data/contentData';
 // icons
-import { BookOpen, PlayCircle, CheckCircle2, Check } from "lucide-react";
-import { FaReact } from "react-icons/fa";
+import { BookOpen, PlayCircle, CheckCircle2, Check } from 'lucide-react';
+import { FaReact } from 'react-icons/fa';
 // shadcn/ui
 import {
   Sidebar,
@@ -20,14 +20,14 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "./ui/sidebar";
-import { Progress } from "./ui/progress";
+} from './ui/sidebar';
+import { Progress } from './ui/progress';
 // helpers
 import {
   groupContentBySection,
   isCompleteCourse,
   mappingTitlebySection,
-} from "~/helper/helper";
+} from '~/helper/helper';
 
 export function AppSidebar() {
   const lectureId = useParams().id;
@@ -56,8 +56,8 @@ export function AppSidebar() {
     if (!sideBarItemRef.current) return;
 
     sideBarItemRef.current.scrollIntoView({
-      block: "center",
-      behavior: "smooth",
+      block: 'center',
+      behavior: 'smooth',
     });
   }, [lectureId]);
 
@@ -72,11 +72,12 @@ export function AppSidebar() {
   return (
     <Sidebar className="">
       <SidebarHeader className="p-4">
-        <h2 className="flex items-center gap-3 text-xl font-bold tracking-tight">
-          <FaReact id="react-icon" className="text-blue-600 animate-spin" />
-          <span>{currentUser?.course} Class</span>
-        </h2>
-
+        <Link to="/">
+          <h2 className="flex items-center gap-3 text-xl font-bold tracking-tight">
+            <FaReact id="react-icon" className="text-blue-600 animate-spin" />
+            <span>{currentUser?.course} Class</span>
+          </h2>
+        </Link>
         <div className="flex items-center gap-2">
           <Progress value={progress} className="w-full" />
           <p className="text-xs text-muted-foreground">{progress}%</p>
@@ -101,8 +102,8 @@ export function AppSidebar() {
                       <SidebarMenuButton
                         className={`${
                           lectureId === content.id
-                            ? "bg-blue-400 text-white"
-                            : ""
+                            ? 'bg-blue-400 text-white'
+                            : ''
                         } `}
                       >
                         {/* <content.icon className="mr-2 h-4 w-4" /> */}
@@ -110,8 +111,8 @@ export function AppSidebar() {
                         <Check
                           className={`${
                             isCompleteCourse(content, currentUser)
-                              ? "block"
-                              : "hidden"
+                              ? 'block'
+                              : 'hidden'
                           } ml-auto h-4 w-4 text-white bg-blue-400 rounded-full`}
                         />
                       </SidebarMenuButton>

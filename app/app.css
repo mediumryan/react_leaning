@@ -24,7 +24,8 @@ a {
   cursor: pointer;
 }
 
-ul {
+ul,
+ol {
   padding-left: 2rem;
 }
 

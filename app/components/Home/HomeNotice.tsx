@@ -39,7 +39,7 @@ export default function HomeNotice() {
                 >
                   <div className="flex items-center gap-2 mb-1">
                     {notice.isImportant && (
-                      <Badge variant="destructive">중요</Badge>
+                      <Badge variant="destructive">重要</Badge>
                     )}
                     {notice.isNew && <Badge variant="secondary">NEW</Badge>}
                   </div>
@@ -53,7 +53,7 @@ export default function HomeNotice() {
 
               {notices?.length === 0 && (
                 <div className="text-sm text-muted-foreground text-center py-10">
-                  등록된 공지사항이 없습니다.
+                  登録されているお知らせはありません。
                 </div>
               )}
             </ul>
