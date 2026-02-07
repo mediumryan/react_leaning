@@ -1,72 +1,59 @@
-import type { Notice } from "~/data/noticeData";
+// atoms
+import { useAtomValue, useSetAtom } from 'jotai';
+import { currentUserAtom } from '~/data/userData';
+import { type Notice } from '~/data/noticeData';
+import { refetchAtom } from '~/data/commonData';
+// shadcn/ui
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "../ui/dialog";
-import { Button } from "../ui/button";
-import { Trash2, Pencil } from "lucide-react";
-import { deleteNotice } from "~/lib/firestore_utils";
-import { useAtomValue, useSetAtom } from "jotai";
-import { currentUserAtom } from "~/data/userData";
-import { confirm } from "~/helper/confirm";
-import { refetchAtom } from "~/data/commonData";
-import { Alert, AlertTitle } from "../ui/alert";
+} from '../ui/dialog';
+import { Button } from '../ui/button';
+// icons
+import { Trash2 } from 'lucide-react';
+// helpers
+import { deleteNotice } from '~/lib/firestore_utils';
+// i18n
+import { useTranslation } from 'react-i18next';
+import { CommonAlert } from '../ConfirmDialog';
+import { toast } from 'sonner';
+import HomeNoticeDialog from './HomeNoticeDialog';
 
 interface HomeNoticeDetailProps {
   selectedNotice: Notice | null;
   setSelectedNotice: (notice: Notice | null) => void;
+  open: boolean;
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export default function HomeNoticeDetail({
   selectedNotice,
   setSelectedNotice,
+  open,
+  setOpen,
 }: HomeNoticeDetailProps) {
+  const { t } = useTranslation();
+
   const currentUser = useAtomValue(currentUserAtom);
   const setRefetch = useSetAtom(refetchAtom);
 
   const handleDeleteNotice = async () => {
     if (!selectedNotice) return;
 
-    const ok = await confirm({
-      icon: 1,
-      message: "このお知らせを削除しますか？",
-      size: "sm",
-    });
-
-    if (!ok) return;
-
     try {
       await deleteNotice(selectedNotice.id);
-      await confirm({
-        icon: 1,
-        message: "お知らせが削除されました。",
-        size: "sm",
-      }).then(() => {});
-
-      await rendingAlert();
+      toast.success(t('notice.notice_delete_success'));
 
       setSelectedNotice(null);
       setRefetch((prev) => prev + 1);
     } catch (e) {
-      await confirm({
-        icon: 0,
-        message: "お知らせの削除に失敗しました。",
-        size: "sm",
-      }).then(() => {});
-
+      toast.error(t('notice.notice_delete_fail'));
+      console.error(e);
       return;
     }
-  };
-
-  const rendingAlert = async () => {
-    return (
-      <Alert>
-        <AlertTitle>お知らせが削除されました。</AlertTitle>
-      </Alert>
-    );
   };
 
   return (
@@ -90,29 +77,35 @@ export default function HomeNoticeDetail({
             </div>
 
             {/* 관리자 / 강사 전용 액션 */}
-            {(currentUser?.authority === "admin" ||
-              currentUser?.authority === "instructor") && (
+            {(currentUser?.authority === 'admin' ||
+              currentUser?.authority === 'instructor') && (
               <DialogFooter className="flex justify-end gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    // 수정 다이얼로그 열기
-                    console.log("edit notice");
-                  }}
-                >
-                  <Pencil className="w-4 h-4 mr-1" />
-                  修正
-                </Button>
-
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={handleDeleteNotice}
-                >
-                  <Trash2 className="w-4 h-4 mr-1" />
-                  削除
-                </Button>
+                <HomeNoticeDialog
+                  open={open}
+                  setOpen={setOpen}
+                  isAdd={false}
+                  titleProps={selectedNotice.title}
+                  contentProps={selectedNotice.content}
+                  isImportantProps={selectedNotice.isImportant ?? false}
+                  noticeId={selectedNotice.id}
+                  onCloseDetail={setSelectedNotice}
+                />
+                <CommonAlert
+                  buttonLabel={
+                    <>
+                      <Trash2 className="w-4 h-4 mr-1" />
+                      {t('common.delete')}
+                    </>
+                  }
+                  triggerVariant="destructive"
+                  triggerDisabled={false}
+                  triggerSize="sm"
+                  title={t('notice.notice_delete_confirm')}
+                  titleWithIcon="warning"
+                  cancleButtonLabel={t('common.cancel')}
+                  confirmButtonLabel={t('common.delete')}
+                  onConfirm={handleDeleteNotice}
+                />
               </DialogFooter>
             )}
           </>

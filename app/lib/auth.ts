@@ -30,7 +30,6 @@ export const onAuthChange = (callback: (user: User | null) => void) => {
   return onAuthStateChanged(auth, callback);
 };
 
-
 let authListenerInitialized = false;
 
 export function initAuthListener() {

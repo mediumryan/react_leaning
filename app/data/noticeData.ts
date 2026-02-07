@@ -1,7 +1,7 @@
-import { atomWithQuery } from "jotai-tanstack-query";
-import { refetchAtom } from "./commonData";
-import { currentUserAtom, type User } from "./userData";
-import { getNotices } from "~/lib/firestore_utils";
+import { atomWithQuery } from 'jotai-tanstack-query';
+import { refetchAtom } from './commonData';
+import { currentUserAtom, type User } from './userData';
+import { getNotices } from '~/lib/firestore_utils';
 
 export type Notice = {
   id: string;
@@ -13,7 +13,7 @@ export type Notice = {
 };
 
 export const noticeAtom = atomWithQuery((get) => ({
-  queryKey: ["notice", get(refetchAtom), get(currentUserAtom)],
+  queryKey: ['notice', get(refetchAtom), get(currentUserAtom)],
   queryFn: async ({ queryKey }) => {
     const [, , currentUser] = queryKey as [string, number, User | null];
 

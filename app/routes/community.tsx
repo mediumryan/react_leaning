@@ -1,37 +1,29 @@
 // react
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 // react-router
-import { Navigate } from "react-router";
+import { Navigate } from 'react-router';
 // atoms
-import { useSetAtom, useAtomValue, useAtom } from "jotai";
-import { currentUserAtom } from "~/data/userData";
-import { refetchAtom } from "~/data/commonData";
-import { postOrderAtom, postsAtom, type PostType } from "~/data/postData";
+import { useSetAtom, useAtomValue, useAtom } from 'jotai';
+import { currentUserAtom } from '~/data/userData';
+import { refetchAtom } from '~/data/commonData';
+import { postOrderAtom, postsAtom, type PostType } from '~/data/postData';
 // shadcn/ui
-import { Button } from "~/components/ui/button";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  CardFooter,
-} from "~/components/ui/card";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "~/components/ui/dialog";
-import { ButtonGroup } from "~/components/ui/button-group";
-import { Badge } from "~/components/ui/badge";
-// icons
-import { HeartIcon, PlusIcon } from "lucide-react";
+} from '~/components/ui/dialog';
+import { toast } from 'sonner';
 // components
-import PostForm from "~/components/PostForm";
-import { BackgroundSpinner } from "~/components/BackgroundSpinner";
+import { BackgroundSpinner } from '~/components/BackgroundSpinner';
+import { CommunityHeader } from '~/components/Community/CommunityHeader';
+import { CommunityPost } from '~/components/Community/CommunityPost';
+import CommunityPostForm from '~/components/Community/CommunityPostForm';
 // helpers
-import { addPost, deletePost, likePost, updatePost } from "~/data/postApi";
-import { confirm } from "~/helper/confirm";
+import { addPost, deletePost, likePost, updatePost } from '~/data/postApi';
+import { useTranslation } from 'react-i18next';
+import { Button } from '~/components/ui/button';
 
 function Community() {
   const currentUser = useAtomValue(currentUserAtom);
@@ -42,7 +34,9 @@ function Community() {
 
   const [postOrder, setPostOrder] = useAtom(postOrderAtom);
 
-  const [{ data: initialPosts, isPending, isError }] = useAtom(postsAtom);
+  const [{ data: initialPosts, isPending }] = useAtom(postsAtom);
+
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!initialPosts) return;
@@ -52,13 +46,11 @@ function Community() {
 
       let sortedPosts = [...initialPosts];
 
-      if (postOrder === "new") {
+      if (postOrder === 'new') {
         sortedPosts.sort(
           (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
         );
-
-        console.log("Sorted by new:", sortedPosts);
-      } else if (postOrder === "popular") {
+      } else if (postOrder === 'popular') {
         sortedPosts.sort((a, b) => b.likeCount - a.likeCount);
       }
 
@@ -69,30 +61,29 @@ function Community() {
   }, [initialPosts, postOrder]);
 
   const handleDelete = async (post: PostType) => {
-    const ok = await confirm({
-      icon: 1,
-      message: "削除しますか？",
-      size: "sm",
-    });
+    try {
+      await deletePost(post);
+      setRefetch((c) => c + 1);
 
-    if (!ok) return;
-
-    await deletePost(post);
-    setRefetch((c) => c + 1);
+      toast.success('ポストが削除されました');
+    } catch (err) {
+      console.error('Failed to delete post:', err);
+    }
   };
 
   const handleSave = async (
-    post: Omit<PostType, "id" | "createdAt" | "likeCount" | "likedUsers"> & {
+    post: Omit<PostType, 'id' | 'createdAt' | 'likeCount' | 'likedUsers'> & {
       userId: string;
     },
   ) => {
     if (editingPost) {
       await updatePost(editingPost.id, editingPost, post);
     } else {
-      await addPost(post, post.userId || "Anonymous");
+      await addPost(post, post.userId || 'Anonymous');
     }
 
     setRefetch((c) => c + 1);
+    toast.success(`ポストが${editingPost ? '更新' : '作成'}されました`);
   };
 
   const isNewPost = (post: PostType) => {
@@ -120,7 +111,7 @@ function Community() {
     try {
       await likePost(post.id, currentUser.uid);
     } catch (err) {
-      console.error("Like update failed, reverting:", err);
+      console.error('Like update failed, reverting:', err);
       // On error, refetch from the server to get the correct state
       setRefetch((c) => c + 1);
     }
@@ -138,129 +129,36 @@ function Community() {
       <div className="flex justify-center">
         {/* 중앙 쇼츠 피드 */}
         <main className="w-full max-w-xl md:max-w-2xl px-4 py-10 space-y-10">
+          <Button>{t('lecture.complete_button')}</Button>
           {/* 상단 액션 바 */}
-          <div className="flex justify-between items-center">
-            <ButtonGroup className="gap-0.5">
-              <Button
-                onClick={() => setPostOrder("new")}
-                variant={postOrder === "new" ? "default" : "secondary"}
-              >
-                最新
-              </Button>
-              <Button
-                onClick={() => setPostOrder("popular")}
-                variant={postOrder === "popular" ? "default" : "secondary"}
-              >
-                人気
-              </Button>
-            </ButtonGroup>
-            <Button
-              className="flex items-center gap-2"
-              onClick={() => {
-                setEditingPost(null);
-                setShowForm(true);
-              }}
-            >
-              <PlusIcon className="w-4 h-4" />
-              ポスト作成
-            </Button>
-          </div>
-
+          <CommunityHeader
+            postOrder={postOrder}
+            setPostOrder={setPostOrder}
+            setEditingPost={setEditingPost}
+            setShowForm={setShowForm}
+          />
           {/* 게시글 피드 */}
-          {posts.map((post) => (
-            <Card key={post.id} className="shadow-sm relative">
-              <CardHeader>
-                <CardTitle className="text-lg flex justify-between items-center">
-                  <span>{post.title}</span>
-                  <div className="text-sm flex flex-col items-end space-y-0.5">
-                    <span>{post.name}</span>
-                    <span>{post.createdAt.toLocaleDateString()}</span>
-                  </div>
-                </CardTitle>
-              </CardHeader>
-
-              <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground">{post.content}</p>
-
-                {post.projectLink && (
-                  <a
-                    href={post.projectLink}
-                    target="_blank"
-                    className="text-sm text-blue-600 underline"
-                  >
-                    プロジェクトリンク
-                  </a>
-                )}
-
-                {post.imageUrl && (
-                  <div className="aspect-video overflow-hidden rounded-md">
-                    <img
-                      src={post.imageUrl}
-                      alt=""
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                )}
-              </CardContent>
-
-              <CardFooter className="flex justify-between">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="flex items-center gap-1"
-                  onClick={() => handleClickLikeButton(post)}
-                >
-                  <HeartIcon
-                    className="w-4 h-4"
-                    fill={post.isLiked ? "red" : "none"}
-                  />
-                  {post.likeCount}
-                </Button>
-
-                {(currentUser.authority === "admin" ||
-                  currentUser.authority === "instructor" ||
-                  currentUser.uid === post.userId) && (
-                  <div className="flex gap-2">
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => {
-                        setEditingPost(post);
-                        setShowForm(true);
-                      }}
-                    >
-                      修正
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => handleDelete(post)}
-                    >
-                      削除
-                    </Button>
-                  </div>
-                )}
-              </CardFooter>
-              {isNewPost(post) && (
-                <Badge className="absolute top-0 left-0 animate-bounce">
-                  New
-                </Badge>
-              )}
-            </Card>
-          ))}
+          <CommunityPost
+            posts={posts}
+            handleClickLikeButton={handleClickLikeButton}
+            handleDelete={handleDelete}
+            setEditingPost={setEditingPost}
+            setShowForm={setShowForm}
+            isNewPost={isNewPost}
+          />
         </main>
       </div>
 
       {/* 게시글 작성 / 수정 다이얼로그 */}
       <Dialog open={showForm} onOpenChange={setShowForm}>
-        <DialogContent>
+        <DialogContent aria-describedby="ポストの修正、追加ができるモーダルです。">
           <DialogHeader>
             <DialogTitle>
-              {editingPost ? "ポスト修正" : "ポスト作成"}
+              {editingPost ? 'ポスト修正' : 'ポスト作成'}
             </DialogTitle>
           </DialogHeader>
 
-          <PostForm
+          <CommunityPostForm
             editPost={editingPost}
             onClose={() => setShowForm(false)}
             onSave={handleSave}

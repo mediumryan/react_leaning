@@ -1,19 +1,29 @@
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { ScrollArea } from "../ui/scroll-area";
-import { Badge } from "../ui/badge";
-import { useAtom, useAtomValue } from "jotai";
-import { currentUserAtom } from "~/data/userData";
-import { noticeAtom, type Notice } from "~/data/noticeData";
-import HomeAddNoticeDialog from "./HomeAddNoticeDialog";
-import { BackgroundSpinner } from "../BackgroundSpinner";
-import HomeNoticeDetail from "./HomeNoticeDetail";
+// react
+import { useState } from 'react';
+// atoms
+import { useAtom, useAtomValue } from 'jotai';
+import { currentUserAtom } from '~/data/userData';
+import { noticeAtom, type Notice } from '~/data/noticeData';
+// shadcn/ui
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { ScrollArea } from '../ui/scroll-area';
+import { Badge } from '../ui/badge';
+// components
+import HomeNoticeDetail from './HomeNoticeDetail';
+import HomeNoticeDialog from './HomeNoticeDialog';
+import { BackgroundSpinner } from '../BackgroundSpinner';
+// i18n
+import { useTranslation } from 'react-i18next';
 
 export default function HomeNotice() {
+  const { t } = useTranslation();
+
   const currentUser = useAtomValue(currentUserAtom);
 
   const [{ data: notices, isPending }] = useAtom(noticeAtom);
   const [selectedNotice, setSelectedNotice] = useState<Notice | null>(null);
+
+  const [open, setOpen] = useState(false);
 
   if (isPending) return <BackgroundSpinner />;
 
@@ -24,22 +34,33 @@ export default function HomeNotice() {
           <CardTitle>Notice</CardTitle>
 
           {/* 공지 추가 모달 - 관리자 및 강사만 접근 가능 */}
-          {(currentUser?.authority === "admin" ||
-            currentUser?.authority === "instructor") && <HomeAddNoticeDialog />}
+          {(currentUser?.authority === 'admin' ||
+            currentUser?.authority === 'instructor') && (
+            <HomeNoticeDialog
+              open={open}
+              setOpen={setOpen}
+              isAdd={true}
+              titleProps=""
+              contentProps=""
+              isImportantProps={false}
+            />
+          )}
         </CardHeader>
 
         <CardContent>
           <ScrollArea className="h-50 pr-4">
-            <ul className="space-y-3">
+            <div className="space-y-3">
               {notices?.map((notice) => (
-                <li
+                <Card
                   key={notice.id}
                   onClick={() => setSelectedNotice(notice)}
                   className="cursor-pointer rounded-md border p-3 hover:bg-muted"
                 >
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="flex items-center gap-2">
                     {notice.isImportant && (
-                      <Badge variant="destructive">重要</Badge>
+                      <Badge variant="destructive">
+                        {t('notice.notice_important')}
+                      </Badge>
                     )}
                     {notice.isNew && <Badge variant="secondary">NEW</Badge>}
                   </div>
@@ -48,15 +69,15 @@ export default function HomeNotice() {
                   <div className="text-xs text-muted-foreground">
                     {notice.createdAt.toLocaleDateString()}
                   </div>
-                </li>
+                </Card>
               ))}
 
               {notices?.length === 0 && (
                 <div className="text-sm text-muted-foreground text-center py-10">
-                  登録されているお知らせはありません。
+                  {t('notice.notice_empty')}
                 </div>
               )}
-            </ul>
+            </div>
           </ScrollArea>
         </CardContent>
       </Card>
@@ -65,6 +86,8 @@ export default function HomeNotice() {
       <HomeNoticeDetail
         selectedNotice={selectedNotice}
         setSelectedNotice={setSelectedNotice}
+        open={open}
+        setOpen={setOpen}
       />
     </>
   );

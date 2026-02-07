@@ -1,61 +1,51 @@
 // react
-import React, { useState } from "react";
+import React, { useState } from 'react';
 // react-router
-import { useNavigate } from "react-router";
+import { useNavigate } from 'react-router';
 // atoms
-import { useAtom } from "jotai";
-import { contentsQueryAtom } from "~/data/contentData";
+import { useAtom } from 'jotai';
 // shadcn/ui
-import { Button } from "~/components/ui/button";
-import { Card } from "~/components/ui/card";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
+import { Button } from '~/components/ui/button';
+import { Card } from '~/components/ui/card';
+import { Input } from '~/components/ui/input';
+import { Label } from '~/components/ui/label';
 // firebase
-import { signUp } from "~/lib/auth";
-import { firestore } from "~/lib/firebase";
-import { doc, setDoc } from "firebase/firestore";
+import { signUp } from '~/lib/auth';
+import { firestore } from '~/lib/firebase';
+import { doc, setDoc } from 'firebase/firestore';
 
 const SignUp = () => {
   const navigate = useNavigate();
 
-  const [name, setName] = useState("");
-  const [nickname, setNickname] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [name, setName] = useState('');
+  const [nickname, setNickname] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
-
-  const [{ data: contents }] = useAtom(contentsQueryAtom);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-
-    if (!contents) {
-      setError(
-        "コンテンツデータがまだ読み込まれていません。もう一度お試しください。",
-      );
-      return;
-    }
 
     try {
       // 1. Firebase Auth에 유저 생성
       const userCredential = await signUp(email, password);
       const user = userCredential.user;
 
-      if (!user) throw new Error("User creation failed");
+      if (!user) throw new Error('User creation failed');
 
       // 2. Firestore에 기본 유저 정보 저장 (contentStatus 제외)
-      await setDoc(doc(firestore, "users", user.uid), {
+      await setDoc(doc(firestore, 'users', user.uid), {
         name: name,
         nickname: nickname,
         email: email,
-        course: "Beginner",
-        grade: "Bronze",
+        course: 'Beginner',
+        grade: 'Bronze',
         exp: 0,
-        authority: "user",
+        authority: 'user',
       });
-      alert("サインアップに成功しました！ようこそ！");
-      navigate("/");
+      alert('サインアップに成功しました！ようこそ！');
+      navigate('/');
     } catch (err: any) {
       setError(err.message);
       alert(`サインアップに失敗しました: ${err.message}`);

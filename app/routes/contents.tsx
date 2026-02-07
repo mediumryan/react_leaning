@@ -1,28 +1,10 @@
 // react
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 // react-router
 import { Navigate, useParams } from "react-router";
 // atoms
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { contentsQueryAtom, mockContents } from "~/data/contentData";
-import { currentUserAtom } from "~/data/userData"; // Import setCurrentUser
-// shadcn/ui
-import { ScrollArea } from "~/components/ui/scroll-area";
-import { AppSidebar } from "~/components/Sidebar";
-import { Button } from "~/components/ui/button";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "~/components/ui/sidebar";
-// components
-import ContentFooter from "~/components/ContentFooter";
-import Contents from "~/components/Contents";
-import GoTopButton from "~/components/GoTopButton";
-// helpers
-import { migrateContentToFirestore } from "~/script/migrateContent";
-import { doc, serverTimestamp, setDoc } from "firebase/firestore";
-import { firestore } from "~/lib/firebase";
+import { currentUserAtom } from "~/data/userData";
 import {
   displayedCorrectAnswerAtom,
   isCorrectAtom,
@@ -30,15 +12,35 @@ import {
   showFeedbackAtom,
   userAnswersAtom,
 } from "~/data/quizData";
+import { contentsAtom } from "~/data/contentData";
+// shadcn/ui
+import { ScrollArea } from "~/components/ui/scroll-area";
+import { Button } from "~/components/ui/button";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "~/components/ui/sidebar";
+// components
+import ContentFooter from "~/components/Contents/ContentFooter";
+import Contents from "~/components/Contents/Contents";
+import GoTopButton from "~/components/GoTopButton";
+import { AppSidebar } from "~/components/Contents/Sidebar";
+// helpers
+import { migrateContentToFirestore } from "~/script/migrateContent";
+// firebase
+import { doc, serverTimestamp, setDoc } from "firebase/firestore";
+import { firestore } from "~/lib/firebase";
 
 export default function LectureLayout() {
-  const [currentUser, setCurrentUser] = useAtom(currentUserAtom); // Use useAtom for currentUser
-  // const [{ data: contents }] = useAtom(contentsQueryAtom);
-  const contents = useAtomValue(contentsQueryAtom);
+  const [currentUser, setCurrentUser] = useAtom(currentUserAtom);
 
   const lectureId = useParams().id;
 
-  const [headerTitle, setHeaderTitle] = useState("");
+  const contents = useAtomValue(contentsAtom);
+
+  const currentLecture = contents.find((item) => item.id === lectureId);
+  const headerTitle = currentLecture?.title || "";
 
   const setUserAnswer = useSetAtom(userAnswersAtom);
   const setIsSubmitted = useSetAtom(isSubmittedAtom);
@@ -56,14 +58,8 @@ export default function LectureLayout() {
 
   useEffect(() => {
     if (!lectureId || !contents) return;
-    console.log(contents);
-    const foundContent = contents.find((item) => item.id === lectureId);
-    if (foundContent) {
-      setHeaderTitle(foundContent.title);
-    }
-
     resetQuizState();
-  }, [lectureId, contents]);
+  }, [lectureId]);
 
   const handleQuizCompletion = async (contentId: string) => {
     if (!currentUser) return;
@@ -120,10 +116,10 @@ export default function LectureLayout() {
                 <SidebarTrigger />
                 <div className="font-semibold">{headerTitle}</div>
               </div>
-              {/* 임시 마이그레이션 버튼*/}
+              {/* 임시 마이그레이션 버튼
               <Button onClick={migrateContentToFirestore} variant="outline">
                 Migrate Data
-              </Button>
+              </Button> */}
             </header>
 
             <ScrollArea>

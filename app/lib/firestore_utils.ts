@@ -1,4 +1,4 @@
-import { firestore } from "./firebase";
+import { firestore } from './firebase';
 import {
   doc,
   getDoc,
@@ -13,10 +13,10 @@ import {
   Timestamp,
   addDoc,
   serverTimestamp, // Import writeBatch for batch deletions
-} from "firebase/firestore";
-import type { User } from "~/data/userData";
-import type { Content } from "~/data/contentData";
-import type { Notice } from "~/data/noticeData";
+} from 'firebase/firestore';
+import type { User } from '~/data/userData';
+import type { Content } from '~/data/contentData';
+import type { Notice } from '~/data/noticeData';
 
 /**
  * Fetches a user's profile from the 'users' collection in Firestore.
@@ -24,14 +24,14 @@ import type { Notice } from "~/data/noticeData";
  * @returns The user profile object or null if not found.
  */
 export const getUserProfile = async (uid: string): Promise<User | null> => {
-  const userDocRef = doc(firestore, "users", uid);
+  const userDocRef = doc(firestore, 'users', uid);
   const userDocSnap = await getDoc(userDocRef);
 
   if (userDocSnap.exists()) {
     const userData = userDocSnap.data();
 
     // Fetch the contentStatus subcollection
-    const contentStatusCollectionRef = collection(userDocRef, "contentStatus");
+    const contentStatusCollectionRef = collection(userDocRef, 'contentStatus');
     const contentStatusSnap = await getDocs(contentStatusCollectionRef);
 
     // Create a Set of completed content IDs
@@ -39,17 +39,23 @@ export const getUserProfile = async (uid: string): Promise<User | null> => {
 
     return {
       uid,
-      ...userData,
-      contentStatus, // Overwrite with the Set
+      name: userData.name ?? '',
+      nickname: userData.nickname ?? '',
+      email: userData.email ?? '',
+      exp: userData.exp ?? 0,
+      authority: userData.authority ?? 'user',
+      course: userData.course ?? 'default',
+      grade: userData.grade ?? 'beginner',
+      contentStatus,
     } as User;
   } else {
-    console.error("No user profile found in Firestore for UID:", uid);
+    console.error('No user profile found in Firestore for UID:', uid);
     return null;
   }
 };
 
 export const getAllUsers = async (): Promise<User[]> => {
-  const usersCollectionRef = collection(firestore, "users");
+  const usersCollectionRef = collection(firestore, 'users');
   const querySnapshot = await getDocs(usersCollectionRef);
   const users: User[] = [];
 
@@ -58,7 +64,7 @@ export const getAllUsers = async (): Promise<User[]> => {
     const uid = userDoc.id;
 
     // Fetch the contentStatus subcollection for each user
-    const contentStatusCollectionRef = collection(userDoc.ref, "contentStatus");
+    const contentStatusCollectionRef = collection(userDoc.ref, 'contentStatus');
     const contentStatusSnap = await getDocs(contentStatusCollectionRef);
     const contentStatus = new Set(contentStatusSnap.docs.map((doc) => doc.id));
 
@@ -77,7 +83,7 @@ export const getAllUsers = async (): Promise<User[]> => {
  * @param user The user object to add.
  */
 export const addUserToFirestore = async (user: User) => {
-  const userDocRef = doc(firestore, "users", user.uid);
+  const userDocRef = doc(firestore, 'users', user.uid);
   // Ensure contentStatus is not directly stored in the main user document
   const { contentStatus, ...userDataToStore } = user;
   await setDoc(userDocRef, userDataToStore);
@@ -87,7 +93,7 @@ export const addUserToFirestore = async (user: User) => {
   // We'll create empty one or add based on provided for robustness, though new users start empty.
   const batch = writeBatch(firestore);
   contentStatus.forEach((contentId) => {
-    const contentStatusDocRef = doc(userDocRef, "contentStatus", contentId);
+    const contentStatusDocRef = doc(userDocRef, 'contentStatus', contentId);
     batch.set(contentStatusDocRef, { createdAt: new Date() }); // Use serverTimestamp() in actual creation
   });
   await batch.commit();
@@ -102,7 +108,7 @@ export const updateUserInFirestore = async (
   uid: string,
   updates: Partial<User>,
 ) => {
-  const userDocRef = doc(firestore, "users", uid);
+  const userDocRef = doc(firestore, 'users', uid);
   // Do not allow contentStatus to be updated directly via this function
   const { contentStatus, ...updatesToApply } = updates;
   await updateDoc(userDocRef, updatesToApply);
@@ -113,10 +119,10 @@ export const updateUserInFirestore = async (
  * @param uid The user's unique ID.
  */
 export const deleteUserFromFirestore = async (uid: string) => {
-  const userDocRef = doc(firestore, "users", uid);
+  const userDocRef = doc(firestore, 'users', uid);
 
   // Delete all documents in the contentStatus subcollection
-  const contentStatusCollectionRef = collection(userDocRef, "contentStatus");
+  const contentStatusCollectionRef = collection(userDocRef, 'contentStatus');
   const querySnapshot = await getDocs(contentStatusCollectionRef);
   const batch = writeBatch(firestore);
   querySnapshot.docs.forEach((doc) => {
@@ -134,15 +140,15 @@ export const deleteUserFromFirestore = async (uid: string) => {
  * @param newCourse The new course to set.
  */
 export const updateUserCourse = async (uid: string, newCourse: string) => {
-  const userDocRef = doc(firestore, "users", uid);
+  const userDocRef = doc(firestore, 'users', uid);
   await updateDoc(userDocRef, {
     course: newCourse,
   });
 };
 
 export const getContents = async (): Promise<Content[]> => {
-  const contentsCollectionRef = collection(firestore, "contents");
-  const q = query(contentsCollectionRef, orderBy("section"), orderBy("order"));
+  const contentsCollectionRef = collection(firestore, 'contents');
+  const q = query(contentsCollectionRef, orderBy('section'), orderBy('order'));
   const querySnapshot = await getDocs(q);
 
   return querySnapshot.docs.map((doc) => {
@@ -156,8 +162,8 @@ export const getContents = async (): Promise<Content[]> => {
 
 export const getNotices = async (): Promise<Notice[]> => {
   try {
-    const noticesRef = collection(firestore, "notices");
-    const q = query(noticesRef, orderBy("createdAt", "desc"));
+    const noticesRef = collection(firestore, 'notices');
+    const q = query(noticesRef, orderBy('createdAt', 'desc'));
 
     const snapshot = await getDocs(q);
 
@@ -174,7 +180,7 @@ export const getNotices = async (): Promise<Notice[]> => {
       } as Notice;
     });
   } catch (error) {
-    console.error("Failed to fetch notices:", error);
+    console.error('Failed to fetch notices:', error);
     return [];
   }
 };
@@ -186,7 +192,7 @@ export const addNotice = async (
   isImportant?: boolean,
 ): Promise<void> => {
   try {
-    const noticesRef = collection(firestore, "notices");
+    const noticesRef = collection(firestore, 'notices');
 
     await addDoc(noticesRef, {
       title: title,
@@ -196,12 +202,25 @@ export const addNotice = async (
       createdAt: serverTimestamp(),
     });
   } catch (error) {
-    console.error("Failed to create notice:", error);
+    console.error('Failed to create notice:', error);
     throw error;
   }
 };
 
 export const deleteNotice = async (noticeId: string) => {
-  const noticeRef = doc(firestore, "notices", noticeId);
+  const noticeRef = doc(firestore, 'notices', noticeId);
   await deleteDoc(noticeRef);
+};
+
+export const editNotice = async (
+  noticeId: string,
+  updates: Partial<Omit<Notice, 'id' | 'createdAt'>>,
+) => {
+  try {
+    const noticeRef = doc(firestore, 'notices', noticeId);
+    await updateDoc(noticeRef, updates);
+  } catch (error) {
+    console.error(`Failed to update notice ${noticeId}:`, error);
+    throw error;
+  }
 };

@@ -1,5 +1,8 @@
 // react
 import { useState } from "react";
+// atoms
+import { useAtomValue } from "jotai";
+import { currentUserAtom } from "~/data/userData";
 // types
 import type { PostType } from "~/data/postData";
 // shadcn/ui
@@ -7,14 +10,14 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
 import { Label } from "~/components/ui/label";
+import { Badge } from "~/components/ui/badge";
 // helpers
 import { confirm } from "~/helper/confirm";
+import { validateImageFile } from "~/helper/helper";
+// firebase
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { storage } from "~/lib/firebase";
-import { validateImageFile } from "~/helper/helper";
-import { Badge } from "./ui/badge";
-import { useAtomValue } from "jotai";
-import { currentUserAtom } from "~/data/userData";
+import { toast } from "sonner";
 
 interface PostFormProps {
   editPost: PostType | null;
@@ -28,8 +31,13 @@ interface PostFormProps {
 
 const MAX_IMAGE_SIZE_MB = 0.5;
 const ALLOWED_IMAGE_TYPES = ["jpeg", "png", "webp"];
+const POST_FORM_TITLE_STYLE = "text-blue-500 mb-4";
 
-export default function PostForm({ editPost, onClose, onSave }: PostFormProps) {
+export const CommunityPostForm = ({
+  editPost,
+  onClose,
+  onSave,
+}: PostFormProps) => {
   const [title, setTitle] = useState(editPost?.title || "");
   const [content, setContent] = useState(editPost?.content || "");
   const [projectLink, setProjectLink] = useState(editPost?.projectLink || "");
@@ -39,11 +47,7 @@ export default function PostForm({ editPost, onClose, onSave }: PostFormProps) {
 
   const handleSave = async () => {
     if (!title.trim()) {
-      await confirm({
-        icon: 0,
-        message: "タイトルを入力してください。",
-        size: "sm",
-      });
+      toast.error("タイトルを入力してください。");
       return;
     }
 
@@ -93,7 +97,9 @@ export default function PostForm({ editPost, onClose, onSave }: PostFormProps) {
     <div className="space-y-4">
       {/* 제목 */}
       <div className="space-y-1">
-        <Label htmlFor="title">タイトル</Label>
+        <Label htmlFor="title" className={POST_FORM_TITLE_STYLE}>
+          タイトル
+        </Label>
         <Input
           id="title"
           placeholder="タイトルを入力してください"
@@ -104,7 +110,9 @@ export default function PostForm({ editPost, onClose, onSave }: PostFormProps) {
 
       {/* 내용 */}
       <div className="space-y-1">
-        <Label htmlFor="content">内容</Label>
+        <Label htmlFor="content" className={POST_FORM_TITLE_STYLE}>
+          内容
+        </Label>
         <Textarea
           id="content"
           placeholder="内容を入力してください"
@@ -116,7 +124,9 @@ export default function PostForm({ editPost, onClose, onSave }: PostFormProps) {
 
       {/* 프로젝트 링크 */}
       <div className="space-y-1">
-        <Label htmlFor="projectLink">プロジェクトリンク</Label>
+        <Label htmlFor="projectLink" className={POST_FORM_TITLE_STYLE}>
+          プロジェクトリンク
+        </Label>
         <Input
           id="projectLink"
           placeholder="https://"
@@ -126,7 +136,9 @@ export default function PostForm({ editPost, onClose, onSave }: PostFormProps) {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="image">プレビューイメージ</Label>
+        <Label htmlFor="image" className={POST_FORM_TITLE_STYLE}>
+          プレビューイメージ
+        </Label>
 
         <Input
           id="image"
@@ -158,4 +170,6 @@ export default function PostForm({ editPost, onClose, onSave }: PostFormProps) {
       </div>
     </div>
   );
-}
+};
+
+export default CommunityPostForm;

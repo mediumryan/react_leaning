@@ -1,12 +1,17 @@
-import { useEffect, useState } from 'react';
-import { Card } from './ui/card';
-import { useAtom, useAtomValue } from 'jotai';
-import ContentQuiz from './ContentQuiz';
-import { contentsQueryAtom, type Content } from '~/data/contentData';
-import ReactMarkdown from 'react-markdown';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import nord from 'react-syntax-highlighter/dist/cjs/styles/prism/nord';
-import remarkGfm from 'remark-gfm';
+// react
+import { useMemo } from "react";
+// atoms
+import { useAtomValue } from "jotai";
+import { contentsAtom } from "~/data/contentData";
+// shadcn/ui
+import { Card } from "../ui/card";
+// components
+import ContentQuiz from "./ContentQuiz";
+// markdown
+import ReactMarkdown from "react-markdown";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import nord from "react-syntax-highlighter/dist/cjs/styles/prism/nord";
+import remarkGfm from "remark-gfm";
 
 interface ContentsProps {
   lectureId: string | undefined;
@@ -14,15 +19,11 @@ interface ContentsProps {
 }
 
 export default function Contents({ lectureId, onQuizComplete }: ContentsProps) {
-  // const [{ data: contents }] = useAtom(contentsQueryAtom);
-  const contents = useAtomValue(contentsQueryAtom);
-  const [currentContent, setCurrentContent] = useState<Content | null>(null);
+  const contents = useAtomValue(contentsAtom);
 
-  useEffect(() => {
-    if (!lectureId || !contents) return;
-    const foundContent = contents.find((item) => item.id === lectureId);
-    setCurrentContent(foundContent ?? null);
-  }, [lectureId, contents]);
+  const currentContent = useMemo(() => {
+    return contents?.find((item) => item.id === lectureId) ?? null;
+  }, [contents, lectureId]);
 
   const renderContent = () => {
     if (!currentContent) {
@@ -46,27 +47,34 @@ export default function Contents({ lectureId, onQuizComplete }: ContentsProps) {
                   </h1>
                 );
               },
+              h3({ children, ...props }) {
+                return (
+                  <h3 className="text-xl font-bold" {...props}>
+                    {children}
+                  </h3>
+                );
+              },
               code({ className, children }) {
-                const match = /language-(\w+)/.exec(className || '');
+                const match = /language-(\w+)/.exec(className || "");
                 return match ? (
                   <SyntaxHighlighter
                     style={nord}
                     language={match[1]}
-                    PreTag="div"
+                    PreTag="pre"
                   >
                     {String(children)
-                      .replace(/\n$/, '')
-                      .replace(/\n&nbsp;\n/g, '')
-                      .replace(/\n&nbsp\n/g, '')}
+                      .replace(/\n$/, "")
+                      .replace(/\n&nbsp;\n/g, "")
+                      .replace(/\n&nbsp\n/g, "")}
                   </SyntaxHighlighter>
                 ) : (
                   <SyntaxHighlighter
                     style={nord}
                     background="green"
                     language="textile"
-                    PreTag="div"
+                    PreTag="pre"
                   >
-                    {String(children).replace(/\n$/, '')}
+                    {String(children).replace(/\n$/, "")}
                   </SyntaxHighlighter>
                 );
               },
@@ -74,9 +82,9 @@ export default function Contents({ lectureId, onQuizComplete }: ContentsProps) {
                 return (
                   <blockquote
                     style={{
-                      background: '#deeaff',
-                      padding: '1px 15px',
-                      borderRadius: '10px',
+                      background: "#deeaff",
+                      padding: "1px 15px",
+                      borderRadius: "10px",
                     }}
                     {...props}
                   >
@@ -87,22 +95,22 @@ export default function Contents({ lectureId, onQuizComplete }: ContentsProps) {
               img({ ...props }) {
                 return (
                   <img
-                    style={{ maxWidth: '40vw' }}
-                    src={props.src?.replace('../../../../public/', '/')}
+                    style={{ maxWidth: "40vw" }}
+                    src={props.src?.replace("../../../../public/", "/")}
                     alt="MarkdownRenderer__Image"
                   />
                 );
               },
               em({ children, ...props }) {
                 return (
-                  <span style={{ fontStyle: 'italic' }} {...props}>
+                  <span style={{ fontStyle: "italic" }} {...props}>
                     {children}
                   </span>
                 );
               },
             }}
           >
-            {currentContent.content.replace(/\n/gi, '\n\n')}
+            {currentContent.content.replace(/\n/gi, "\n\n")}
           </ReactMarkdown>
         );
       case 1:

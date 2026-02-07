@@ -1,14 +1,14 @@
 // react
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from "react";
 // react-router
-import { Link, useParams } from 'react-router';
+import { Link, useParams } from "react-router";
 // atoms
-import { useAtom, useAtomValue } from 'jotai';
-import { currentUserAtom } from '~/data/userData';
-import { contentsQueryAtom } from '~/data/contentData';
+import { useAtomValue } from "jotai";
+import { currentUserAtom } from "~/data/userData";
+import { contentsAtom } from "~/data/contentData";
 // icons
-import { BookOpen, PlayCircle, CheckCircle2, Check } from 'lucide-react';
-import { FaReact } from 'react-icons/fa';
+import { BookOpen, CheckCircle2 } from "lucide-react";
+import { FaReact } from "react-icons/fa";
 // shadcn/ui
 import {
   Sidebar,
@@ -20,14 +20,15 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from './ui/sidebar';
-import { Progress } from './ui/progress';
+} from "~/components/ui/sidebar";
+import { Progress } from "~/components/ui/progress";
 // helpers
 import {
   groupContentBySection,
   isCompleteCourse,
   mappingTitlebySection,
-} from '~/helper/helper';
+} from "~/helper/helper";
+import { cn } from "~/lib/utils";
 
 export function AppSidebar() {
   const lectureId = useParams().id;
@@ -35,12 +36,12 @@ export function AppSidebar() {
   const sideBarItemRef = useRef<HTMLLIElement>(null);
 
   const currentUser = useAtomValue(currentUserAtom);
-  // const [{ data: contents }] = useAtom(contentsQueryAtom);
-  const contents = useAtomValue(contentsQueryAtom);
 
   const [progress, setProgress] = useState(0);
 
-  const CONTENT = contents ? groupContentBySection(contents) : [];
+  const contents = useAtomValue(contentsAtom);
+
+  const headerD = groupContentBySection(contents);
 
   useEffect(() => {
     const contentLength = contents?.length || 0;
@@ -56,18 +57,11 @@ export function AppSidebar() {
     if (!sideBarItemRef.current) return;
 
     sideBarItemRef.current.scrollIntoView({
-      block: 'center',
-      behavior: 'smooth',
+      block: "center",
+      inline: "nearest",
+      behavior: "smooth",
     });
   }, [lectureId]);
-
-  if (!contents) {
-    return (
-      <Sidebar className="flex items-center justify-center">
-        <p>ローディング中...</p>
-      </Sidebar>
-    );
-  }
 
   return (
     <Sidebar className="">
@@ -85,7 +79,7 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        {CONTENT.map((section) => (
+        {headerD.map((section) => (
           <SidebarGroup key={`section${section[0].section}`}>
             <SidebarGroupLabel className="px-2 mb-1 text-blue-400 font-semibold text-sm ">
               {mappingTitlebySection(section[0].section)}
@@ -102,19 +96,48 @@ export function AppSidebar() {
                       <SidebarMenuButton
                         className={`${
                           lectureId === content.id
-                            ? 'bg-blue-400 text-white'
-                            : ''
+                            ? "bg-blue-400 text-white"
+                            : ""
                         } `}
                       >
-                        {/* <content.icon className="mr-2 h-4 w-4" /> */}
-                        <span className="text-xs">{content.title}</span>
-                        <Check
-                          className={`${
-                            isCompleteCourse(content, currentUser)
-                              ? 'block'
-                              : 'hidden'
-                          } ml-auto h-4 w-4 text-white bg-blue-400 rounded-full`}
-                        />
+                        {content.type === 0 ? (
+                          <BookOpen
+                            fill={
+                              isCompleteCourse(content, currentUser)
+                                ? "#51a2ff"
+                                : "none"
+                            }
+                            className={cn(
+                              "w-4 h-4 mr-2",
+                              isCompleteCourse(content, currentUser)
+                                ? "text-gray-200"
+                                : "",
+                            )}
+                          />
+                        ) : (
+                          <CheckCircle2
+                            fill={
+                              isCompleteCourse(content, currentUser)
+                                ? "#51a2ff"
+                                : "none"
+                            }
+                            className={cn(
+                              "w-4 h-4 mr-2",
+                              isCompleteCourse(content, currentUser)
+                                ? "text-gray-200"
+                                : "",
+                            )}
+                          />
+                        )}
+                        <span
+                          className={cn(
+                            "text-xs",
+                            isCompleteCourse(content, currentUser) &&
+                              "opacity-50",
+                          )}
+                        >
+                          {content.title}
+                        </span>
                       </SidebarMenuButton>
                     </Link>
                   </SidebarMenuItem>

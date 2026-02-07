@@ -1,7 +1,5 @@
-// atoms
-import { useAtom } from "jotai";
-import { confirmAtom } from "~/data/confirmData";
 // shadcn/ui
+import type React from 'react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,44 +9,73 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "./ui/alert-dialog";
+  AlertDialogTrigger,
+} from './ui/alert-dialog';
+import { Button } from './ui/button';
 // icons
-import { Ban, Info, TriangleAlert } from "lucide-react";
+import { Ban, Info, TriangleAlert } from 'lucide-react';
 
-export function CommonAlert() {
-  const [confirmContent, setConfirmContent] = useAtom(confirmAtom);
+interface CommonAlertProps {
+  buttonLabel?: React.ReactNode;
+  triggerVariant?:
+    | 'default'
+    | 'outline'
+    | 'ghost'
+    | 'link'
+    | 'secondary'
+    | 'destructive';
+  triggerSize?: 'default' | 'sm' | 'lg' | 'icon';
+  triggerDisabled?: boolean;
+  title?: string;
+  titleWithIcon?: 'default' | 'info' | 'warning' | 'error';
+  description?: string;
+  cancleButtonLabel?: string;
+  confirmButtonLabel?: string;
+  onConfirm?: () => void;
+}
 
-  const handleClose = async (result: boolean) => {
-    if (confirmContent.resolver) {
-      confirmContent.resolver(result);
-    }
-    setConfirmContent({ ...confirmContent, open: false });
-  };
-
+export function CommonAlert({
+  buttonLabel = '',
+  triggerVariant = 'default',
+  triggerDisabled = false,
+  title = '',
+  titleWithIcon = 'default',
+  description = '',
+  cancleButtonLabel = 'Cancel',
+  confirmButtonLabel = 'Continue',
+  onConfirm,
+  triggerSize = 'default',
+}: CommonAlertProps) {
   return (
-    <AlertDialog open={confirmContent.open}>
-      <AlertDialogContent size={confirmContent.options.size}>
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button
+          variant={triggerVariant}
+          disabled={triggerDisabled}
+          size={triggerSize}
+        >
+          {buttonLabel}
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            {confirmContent.options.icon === 0 ? (
-              <Info />
-            ) : confirmContent.options.icon === 1 ? (
-              <TriangleAlert />
-            ) : (
-              <Ban />
-            )}
+            {titleWithIcon === 'info' ? (
+              <Info className="inline mr-2 mb-1 text-blue-500" />
+            ) : titleWithIcon === 'warning' ? (
+              <TriangleAlert className="inline mr-2 mb-1 text-yellow-500" />
+            ) : titleWithIcon === 'error' ? (
+              <Ban className="inline mr-2 mb-1 text-red-500" />
+            ) : null}
+            {title}
           </AlertDialogTitle>
-          <AlertDialogDescription>
-            {confirmContent.options.message}
-          </AlertDialogDescription>
+          <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogAction onClick={() => handleClose(true)}>
-            OK
+          <AlertDialogCancel>{cancleButtonLabel}</AlertDialogCancel>
+          <AlertDialogAction onClick={onConfirm ?? onConfirm}>
+            {confirmButtonLabel}
           </AlertDialogAction>
-          <AlertDialogCancel onClick={() => handleClose(false)}>
-            Cancel
-          </AlertDialogCancel>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

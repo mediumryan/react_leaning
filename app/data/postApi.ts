@@ -10,10 +10,10 @@ import {
   getDoc,
   Timestamp,
   setDoc,
-} from "firebase/firestore";
-import { firestore, storage } from "~/lib/firebase";
-import type { PostType } from "./postData";
-import { deleteObject, ref } from "firebase/storage";
+} from 'firebase/firestore';
+import { firestore, storage } from '~/lib/firebase';
+import type { PostType } from './postData';
+import { deleteObject, ref } from 'firebase/storage';
 
 export const deleteImageByUrl = async (imageUrl: string) => {
   const imageRef = ref(storage, imageUrl);
@@ -22,10 +22,10 @@ export const deleteImageByUrl = async (imageUrl: string) => {
 
 export const getPosts = async (
   currentUserId?: string,
-  postOrder: "new" | "popular" = "new",
+  postOrder: 'new' | 'popular' = 'new',
 ): Promise<PostType[]> => {
-  const postsCollection = collection(firestore, "posts");
-  const q = query(postsCollection, orderBy("createdAt", "desc"));
+  const postsCollection = collection(firestore, 'posts');
+  const q = query(postsCollection, orderBy('createdAt', 'desc'));
   const querySnapshot = await getDocs(q);
   const posts: PostType[] = [];
 
@@ -33,7 +33,7 @@ export const getPosts = async (
     const data = docSnap.data();
 
     // likes 서브컬렉션에서 좋아요한 사용자 ID 확인
-    const likesSnapshot = await getDocs(collection(docSnap.ref, "likes"));
+    const likesSnapshot = await getDocs(collection(docSnap.ref, 'likes'));
     const likedUserIds = likesSnapshot.docs.map((likeDoc) => likeDoc.id);
 
     posts.push({
@@ -50,9 +50,9 @@ export const getPosts = async (
     });
   }
 
-  if (postOrder === "new") {
+  if (postOrder === 'new') {
     posts.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-  } else if (postOrder === "popular") {
+  } else if (postOrder === 'popular') {
     posts.sort((a, b) => b.likeCount - a.likeCount);
   }
 
@@ -60,7 +60,7 @@ export const getPosts = async (
 };
 
 export const addPost = async (
-  post: Omit<PostType, "id" | "createdAt" | "likeCount" | "isLiked">,
+  post: Omit<PostType, 'id' | 'createdAt' | 'likeCount' | 'isLiked'>,
   userId: string,
 ) => {
   const newPost = {
@@ -70,7 +70,7 @@ export const addPost = async (
     likeCount: 0,
   };
 
-  const docRef = await addDoc(collection(firestore, "posts"), newPost);
+  const docRef = await addDoc(collection(firestore, 'posts'), newPost);
 
   return {
     ...newPost,
@@ -83,16 +83,16 @@ export const addPost = async (
 export const updatePost = async (
   id: string,
   prevPost: PostType,
-  post: Partial<Omit<PostType, "id">>,
+  post: Partial<Omit<PostType, 'id'>>,
 ) => {
-  const postRef = doc(firestore, "posts", id);
+  const postRef = doc(firestore, 'posts', id);
 
   // 1️⃣ 이미지가 변경되었을 경우
   if (prevPost.imageUrl && post.imageUrl !== prevPost.imageUrl) {
     try {
       await deleteImageByUrl(prevPost.imageUrl);
     } catch (e) {
-      console.warn("기존 이미지 삭제 실패", e);
+      console.warn('기존 이미지 삭제 실패', e);
     }
   }
 
@@ -106,20 +106,20 @@ export const deletePost = async (post: PostType) => {
     try {
       await deleteImageByUrl(post.imageUrl);
     } catch (e) {
-      console.warn("이미지 삭제 실패", e);
+      console.warn('이미지 삭제 실패', e);
     }
   }
 
   // 2️⃣ Firestore 문서 삭제
-  const postRef = doc(firestore, "posts", post.id);
+  const postRef = doc(firestore, 'posts', post.id);
   await deleteDoc(postRef);
 };
 
 export const likePost = async (postId: string, userId: string) => {
   if (!userId) return;
 
-  const postRef = doc(firestore, "posts", postId);
-  const likeRef = doc(collection(postRef, "likes"), userId);
+  const postRef = doc(firestore, 'posts', postId);
+  const likeRef = doc(collection(postRef, 'likes'), userId);
 
   const likeSnapshot = await getDoc(likeRef);
   const postSnapshot = await getDoc(postRef);

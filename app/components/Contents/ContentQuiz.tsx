@@ -1,17 +1,6 @@
-import type { MultipleChoiceQuiz, ShortAnswerQuiz } from "~/data/contentData";
-import { Button } from "./ui/button";
-import {
-  Field,
-  FieldDescription,
-  FieldLabel,
-  FieldLegend,
-  FieldSet,
-} from "./ui/field";
-import { Input } from "./ui/input";
-import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
-import { cn } from "~/lib/utils"; // Assuming cn for utility classes
-import { checkShortAnswer } from "~/helper/helper"; // Import the helper
+// atoms
 import { useAtom } from "jotai";
+import type { MultipleChoiceQuiz, ShortAnswerQuiz } from "~/data/contentData";
 import {
   displayedCorrectAnswerAtom,
   isCorrectAtom,
@@ -19,6 +8,20 @@ import {
   showFeedbackAtom,
   userAnswersAtom,
 } from "~/data/quizData";
+// shadcn/ui
+import { Button } from "../ui/button";
+import {
+  Field,
+  FieldDescription,
+  FieldLabel,
+  FieldLegend,
+  FieldSet,
+} from "../ui/field";
+import { Input } from "../ui/input";
+import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
+// helpers
+import { cn } from "~/lib/utils";
+import { checkShortAnswer } from "~/helper/helper";
 
 interface ContentQuizProps {
   quiz: MultipleChoiceQuiz | ShortAnswerQuiz;

@@ -22,6 +22,6 @@ const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const firestore = getFirestore(app);
 const auth = getAuth(app);
 const storage = getStorage(app);
-const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
+const analytics = typeof window !== "undefined" ? getAnalytics(app) : null;
 
 export { app, firestore, auth, storage, analytics };

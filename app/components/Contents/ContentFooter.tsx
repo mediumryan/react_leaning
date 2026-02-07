@@ -3,10 +3,11 @@ import { useNavigate, useParams } from "react-router";
 // atoms
 import { currentUserAtom } from "~/data/userData"; // Import contentsAtom
 import { useAtom, useAtomValue } from "jotai"; // Import useAtomValue
-import { contentsQueryAtom } from "~/data/contentData";
+import { contentsAtom } from "~/data/contentData";
 // shadcn/ui
-import { ButtonGroup } from "./ui/button-group";
-import { Button } from "./ui/button";
+import { ButtonGroup } from "../ui/button-group";
+import { Button } from "../ui/button";
+import { toast } from "sonner";
 // icons
 import {
   Check,
@@ -22,6 +23,7 @@ import {
   getNextContentId,
   getPreviousContentId,
 } from "~/helper/helper";
+// firebase
 import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 import { firestore } from "~/lib/firebase";
 
@@ -30,8 +32,7 @@ export default function ContentFooter() {
   const navigate = useNavigate();
 
   const [currentUser, setCurrentUser] = useAtom(currentUserAtom);
-  // const [{ data: contents }] = useAtom(contentsQueryAtom);
-  const contents = useAtomValue(contentsQueryAtom);
+  const contents = useAtomValue(contentsAtom);
 
   if (!contents) {
     return null; // Or render a disabled state for buttons
@@ -83,10 +84,10 @@ export default function ContentFooter() {
         contentStatus: updatedContentStatus,
       });
 
-      alert("このレクチャーを完了しました！");
+      toast.success("レクチャーを完了しました！");
     } catch (error) {
       console.error("Error completing lecture:", error);
-      alert("レクチャーの完了に失敗しました。");
+      toast.error("レクチャーの完了に失敗しました。");
     }
   };
 
