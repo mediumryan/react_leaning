@@ -1,14 +1,14 @@
 // react
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from 'react';
 // react-router
-import { Link, useParams } from "react-router";
+import { Link, useParams } from 'react-router';
 // atoms
-import { useAtomValue } from "jotai";
-import { currentUserAtom } from "~/data/userData";
-import { contentsAtom } from "~/data/contentData";
+import { useAtomValue } from 'jotai';
+import { currentUserAtom } from '~/data/userData';
+import { contentsAtom } from '~/data/contentData';
 // icons
-import { BookOpen, CheckCircle2 } from "lucide-react";
-import { FaReact } from "react-icons/fa";
+import { BookOpen, CheckCircle2 } from 'lucide-react';
+import { FaReact } from 'react-icons/fa';
 // shadcn/ui
 import {
   Sidebar,
@@ -20,15 +20,16 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "~/components/ui/sidebar";
-import { Progress } from "~/components/ui/progress";
+} from '~/components/ui/sidebar';
+import { Progress } from '~/components/ui/progress';
 // helpers
 import {
   groupContentBySection,
   isCompleteCourse,
   mappingTitlebySection,
-} from "~/helper/helper";
-import { cn } from "~/lib/utils";
+} from '~/helper/helper';
+import { cn } from '~/lib/utils';
+import { Label } from '../ui/label';
 
 export function AppSidebar() {
   const lectureId = useParams().id;
@@ -57,9 +58,9 @@ export function AppSidebar() {
     if (!sideBarItemRef.current) return;
 
     sideBarItemRef.current.scrollIntoView({
-      block: "center",
-      inline: "nearest",
-      behavior: "smooth",
+      block: 'center',
+      inline: 'nearest',
+      behavior: 'smooth',
     });
   }, [lectureId]);
 
@@ -92,53 +93,66 @@ export function AppSidebar() {
                     ref={lectureId === content.id ? sideBarItemRef : null}
                     className="px-2"
                   >
-                    <Link to={`/contents/${content.id}`}>
-                      <SidebarMenuButton
-                        className={`${
-                          lectureId === content.id
-                            ? "bg-blue-400 text-white"
-                            : ""
-                        } `}
-                      >
-                        {content.type === 0 ? (
-                          <BookOpen
-                            fill={
-                              isCompleteCourse(content, currentUser)
-                                ? "#51a2ff"
-                                : "none"
-                            }
-                            className={cn(
-                              "w-4 h-4 mr-2",
-                              isCompleteCourse(content, currentUser)
-                                ? "text-gray-200"
-                                : "",
-                            )}
-                          />
-                        ) : (
-                          <CheckCircle2
-                            fill={
-                              isCompleteCourse(content, currentUser)
-                                ? "#51a2ff"
-                                : "none"
-                            }
-                            className={cn(
-                              "w-4 h-4 mr-2",
-                              isCompleteCourse(content, currentUser)
-                                ? "text-gray-200"
-                                : "",
-                            )}
-                          />
-                        )}
-                        <span
-                          className={cn(
-                            "text-xs",
-                            isCompleteCourse(content, currentUser) &&
-                              "opacity-50",
-                          )}
+                    <Link
+                      to={`/contents/${content.id}`}
+                      className="flex flex-col justify-between w-full"
+                    >
+                      <>
+                        <SidebarMenuButton
+                          className={`${
+                            lectureId === content.id
+                              ? 'bg-blue-400 text-white'
+                              : ''
+                          } `}
                         >
-                          {content.title}
-                        </span>
-                      </SidebarMenuButton>
+                          {content.type === 0 ? (
+                            <BookOpen
+                              fill={
+                                isCompleteCourse(content, currentUser)
+                                  ? '#51a2ff'
+                                  : 'none'
+                              }
+                              className={cn(
+                                'w-4 h-4 mr-2',
+                                isCompleteCourse(content, currentUser)
+                                  ? 'text-gray-200'
+                                  : '',
+                              )}
+                            />
+                          ) : (
+                            <CheckCircle2
+                              fill={
+                                isCompleteCourse(content, currentUser)
+                                  ? '#51a2ff'
+                                  : 'none'
+                              }
+                              className={cn(
+                                'w-4 h-4 mr-2',
+                                isCompleteCourse(content, currentUser)
+                                  ? 'text-gray-200'
+                                  : '',
+                              )}
+                            />
+                          )}
+                          <span
+                            className={cn(
+                              'text-xs',
+                              isCompleteCourse(content, currentUser) &&
+                                'opacity-50',
+                            )}
+                          >
+                            {content.title}
+                          </span>
+                        </SidebarMenuButton>
+                      </>
+                      <div className="flex justify-between items-center mt-1 px-1">
+                        <Label className="text-[0.65rem] text-gray-400/70">
+                          {content.exp} XP
+                        </Label>
+                        <Label className="text-[0.65rem] text-gray-400/70">
+                          {content.time}min
+                        </Label>
+                      </div>
                     </Link>
                   </SidebarMenuItem>
                 ))}
