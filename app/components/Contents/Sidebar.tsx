@@ -1,14 +1,14 @@
 // react
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from "react";
 // react-router
-import { Link, useParams } from 'react-router';
+import { Link, useParams } from "react-router";
 // atoms
-import { useAtomValue } from 'jotai';
-import { currentUserAtom } from '~/data/userData';
-import { contentsAtom } from '~/data/contentData';
+import { useAtomValue } from "jotai";
+import { currentUserAtom } from "~/data/userData";
+import { contentsAtom } from "~/data/contentData";
 // icons
-import { BookOpen, CheckCircle2 } from 'lucide-react';
-import { FaReact } from 'react-icons/fa';
+import { BookOpen, CheckCircle2 } from "lucide-react";
+import { FaReact } from "react-icons/fa";
 // shadcn/ui
 import {
   Sidebar,
@@ -20,16 +20,16 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from '~/components/ui/sidebar';
-import { Progress } from '~/components/ui/progress';
+} from "~/components/ui/sidebar";
+import { Progress } from "~/components/ui/progress";
+import { Label } from "../ui/label";
 // helpers
 import {
   groupContentBySection,
   isCompleteCourse,
   mappingTitlebySection,
-} from '~/helper/helper';
-import { cn } from '~/lib/utils';
-import { Label } from '../ui/label';
+} from "~/helper/helper";
+import { cn } from "~/lib/utils";
 
 export function AppSidebar() {
   const lectureId = useParams().id;
@@ -47,7 +47,7 @@ export function AppSidebar() {
   useEffect(() => {
     const contentLength = contents?.length || 0;
     if (!currentUser || !contents) return;
-    const completedCount = currentUser?.contentStatus?.size || 0;
+    const completedCount = currentUser.contentStatus.size || 0;
     const calculatedProgress = Math.floor(
       (completedCount / contentLength) * 100,
     );
@@ -58,9 +58,9 @@ export function AppSidebar() {
     if (!sideBarItemRef.current) return;
 
     sideBarItemRef.current.scrollIntoView({
-      block: 'center',
-      inline: 'nearest',
-      behavior: 'smooth',
+      block: "center",
+      inline: "nearest",
+      behavior: "smooth",
     });
   }, [lectureId]);
 
@@ -101,44 +101,44 @@ export function AppSidebar() {
                         <SidebarMenuButton
                           className={`${
                             lectureId === content.id
-                              ? 'bg-blue-400 text-white'
-                              : ''
+                              ? "bg-blue-400 text-white"
+                              : ""
                           } `}
                         >
                           {content.type === 0 ? (
                             <BookOpen
                               fill={
                                 isCompleteCourse(content, currentUser)
-                                  ? '#51a2ff'
-                                  : 'none'
+                                  ? "#51a2ff"
+                                  : "none"
                               }
                               className={cn(
-                                'w-4 h-4 mr-2',
+                                "w-4 h-4 mr-2",
                                 isCompleteCourse(content, currentUser)
-                                  ? 'text-gray-200'
-                                  : '',
+                                  ? "text-gray-200"
+                                  : "",
                               )}
                             />
                           ) : (
                             <CheckCircle2
                               fill={
                                 isCompleteCourse(content, currentUser)
-                                  ? '#51a2ff'
-                                  : 'none'
+                                  ? "#51a2ff"
+                                  : "none"
                               }
                               className={cn(
-                                'w-4 h-4 mr-2',
+                                "w-4 h-4 mr-2",
                                 isCompleteCourse(content, currentUser)
-                                  ? 'text-gray-200'
-                                  : '',
+                                  ? "text-gray-200"
+                                  : "",
                               )}
                             />
                           )}
                           <span
                             className={cn(
-                              'text-xs',
+                              "text-xs",
                               isCompleteCourse(content, currentUser) &&
-                                'opacity-50',
+                                "opacity-50",
                             )}
                           >
                             {content.title}

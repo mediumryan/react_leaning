@@ -1,12 +1,20 @@
 import type { Content } from "~/data/contentData";
 import { ALLOWED_TYPES, MAX_FILE_SIZE } from "~/data/postData";
-import type { User } from "~/data/userData";
+import type { Grade, User } from "~/data/userData";
 // images
-import branzeBadge from "~/assets/images/grades/bronze.png";
+import bronzeBadge from "~/assets/images/grades/bronze.png";
 import silverBadge from "~/assets/images/grades/silver.png";
 import goldBadge from "~/assets/images/grades/gold.png";
 import platinumBadge from "~/assets/images/grades/platinum.png";
 import diamondBadge from "~/assets/images/grades/diamond.png";
+
+interface GradeInfo {
+  nextGrade: Grade | "Max";
+  maxExp: number;
+  minExp: number;
+  color: string;
+  badge: string;
+}
 
 export const getFirstContentId = (contentList: Content[]) => {
   if (contentList.length === 0) return null;
@@ -134,34 +142,65 @@ export const validateImageFile = (file: File) => {
   return null;
 };
 
-export const getUserMedal = (grade: string) => {
-  switch (grade) {
-    case "Bronze":
-      return branzeBadge;
-    case "Silver":
-      return silverBadge;
-    case "Gold":
-      return goldBadge;
-    case "Platinum":
-      return platinumBadge;
-    case "Diamond":
-      return diamondBadge;
-    default:
-      return "";
-  }
+export const GRADE_CONFIG: Record<Grade, GradeInfo> = {
+  Bronze: {
+    nextGrade: "Silver",
+    minExp: 0,
+    maxExp: 500,
+    color: "text-orange-800",
+    badge: bronzeBadge,
+  },
+  Silver: {
+    nextGrade: "Gold",
+    minExp: 500,
+    maxExp: 1200,
+    color: "text-slate-400",
+    badge: silverBadge,
+  },
+  Gold: {
+    nextGrade: "Platinum",
+    minExp: 1200,
+    maxExp: 2800,
+    color: "text-yellow-500",
+    badge: goldBadge,
+  },
+  Platinum: {
+    nextGrade: "Diamond",
+    minExp: 2800,
+    maxExp: 5000,
+    color: "text-purple-400",
+    badge: platinumBadge,
+  },
+  Diamond: {
+    nextGrade: "Max",
+    minExp: 5000,
+    maxExp: 5000,
+    color: "text-blue-400",
+    badge: diamondBadge,
+  },
 };
 
-export const getUserColorByClass = (grade: string) => {
-  switch (grade) {
-    case "Bronze":
-      return "text-orange-950";
-    case "Silver":
-      return "text-gray-500";
-    case "Gold":
-      return "text-yellow-400";
-    case "Platinum":
-      return "text-cyan-400";
-    default:
-      return "text-gray-100";
-  }
+export const calculateGrade = (totalExp: number): Grade => {
+  if (totalExp >= 5000) return "Diamond";
+  if (totalExp >= 2800) return "Platinum";
+  if (totalExp >= 1200) return "Gold";
+  if (totalExp >= 500) return "Silver";
+  return "Bronze";
+};
+
+export const getGradeInfo = (grade: Grade) => GRADE_CONFIG[grade];
+
+export const getProgress = (grade: Grade, exp: number) => {
+  const config = GRADE_CONFIG[grade];
+  if (grade === "Diamond") return 100;
+
+  const currentRangeExp = exp;
+  const totalRangeExp = config.maxExp;
+
+  const result = Math.min(
+    Math.max((currentRangeExp / totalRangeExp) * 100, 0),
+    100,
+  );
+  console.log(`Grade: ${grade}, Exp: ${exp}, Progress: ${result}%`);
+  return result;
 };

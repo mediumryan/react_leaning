@@ -1,9 +1,11 @@
+// react
+import { useState } from "react";
 // react-router
 import { useNavigate, useParams } from "react-router";
 // atoms
 import { currentUserAtom } from "~/data/userData"; // Import contentsAtom
 import { useAtom, useAtomValue } from "jotai"; // Import useAtomValue
-import { contentsAtom } from "~/data/contentData";
+import { contentsAtom, type Content } from "~/data/contentData";
 // shadcn/ui
 import { ButtonGroup } from "../ui/button-group";
 import { Button } from "../ui/button";
@@ -16,6 +18,8 @@ import {
   ChevronsLeft,
   ChevronsRight,
 } from "lucide-react";
+// components
+import { LevelUpModal } from "./LevelUpModal";
 // helpers
 import {
   getFirstContentId,
@@ -24,18 +28,25 @@ import {
   getPreviousContentId,
 } from "~/helper/helper";
 // firebase
-import { doc, serverTimestamp, setDoc } from "firebase/firestore";
+import { doc, serverTimestamp, writeBatch } from "firebase/firestore";
 import { firestore } from "~/lib/firebase";
+import { completeLectureForUser } from "~/lib/firestore_utils";
 
-export default function ContentFooter() {
+interface ContentFooterProps {
+  currentLecture: Content | undefined;
+}
+
+export default function ContentFooter({ currentLecture }: ContentFooterProps) {
   const lectureId = useParams().id;
   const navigate = useNavigate();
 
   const [currentUser, setCurrentUser] = useAtom(currentUserAtom);
   const contents = useAtomValue(contentsAtom);
 
+  const [isOpen, setIsOpen] = useState(false);
+
   if (!contents) {
-    return null; // Or render a disabled state for buttons
+    return null;
   }
 
   const handleClickFirst = () => {
@@ -59,32 +70,16 @@ export default function ContentFooter() {
   };
 
   const handleClickComplete = async () => {
-    if (!currentUser || !lectureId) return;
-
     try {
-      // Create a document in the contentStatus subcollection
-      const contentStatusDocRef = doc(
-        firestore,
-        "users",
-        currentUser.uid,
-        "contentStatus",
-        lectureId,
-      );
-      await setDoc(contentStatusDocRef, {
-        createdAt: serverTimestamp(),
-      });
-
-      // Update local state
-      const updatedContentStatus = new Set(currentUser.contentStatus).add(
-        lectureId,
+      const updatedUser = await completeLectureForUser(
+        currentUser,
+        currentLecture,
       );
 
-      setCurrentUser({
-        ...currentUser,
-        contentStatus: updatedContentStatus,
-      });
-
-      toast.success("レクチャーを完了しました！");
+      if (updatedUser) {
+        setCurrentUser(updatedUser);
+      }
+      setIsOpen(true);
     } catch (error) {
       console.error("Error completing lecture:", error);
       toast.error("レクチャーの完了に失敗しました。");
@@ -98,54 +93,62 @@ export default function ContentFooter() {
   const hasNext = !!getNextContentId(contents, lectureId ?? "");
 
   return (
-    <ButtonGroup>
-      <ButtonGroup className="flex">
-        <Button
-          variant="outline"
-          size="icon"
-          aria-label="Go First"
-          disabled={!hasPrevious}
-          onClick={handleClickFirst}
-        >
-          <ChevronsLeft />
-        </Button>
-        <Button
-          variant="outline"
-          size="icon"
-          aria-label="Go Previous"
-          disabled={!hasPrevious}
-          onClick={handleClickPrevious}
-        >
-          <ChevronLeft />
-        </Button>
-        <Button
-          variant="outline"
-          size="icon"
-          aria-label="Complete"
-          onClick={handleClickComplete}
-          disabled={isCompleted}
-        >
-          <Check />
-        </Button>
-        <Button
-          variant="outline"
-          size="icon"
-          aria-label="Go Next"
-          disabled={!hasNext}
-          onClick={handleClickNext}
-        >
-          <ChevronRight />
-        </Button>
-        <Button
-          variant="outline"
-          size="icon"
-          aria-label="Go Forward"
-          disabled={!hasNext}
-          onClick={handleClickLast}
-        >
-          <ChevronsRight />
-        </Button>
+    <>
+      <ButtonGroup>
+        <ButtonGroup className="flex">
+          <Button
+            variant="outline"
+            size="icon"
+            aria-label="Go First"
+            disabled={!hasPrevious}
+            onClick={handleClickFirst}
+          >
+            <ChevronsLeft />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            aria-label="Go Previous"
+            disabled={!hasPrevious}
+            onClick={handleClickPrevious}
+          >
+            <ChevronLeft />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            aria-label="Complete"
+            onClick={handleClickComplete}
+            disabled={isCompleted}
+          >
+            <Check />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            aria-label="Go Next"
+            disabled={!hasNext}
+            onClick={handleClickNext}
+          >
+            <ChevronRight />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            aria-label="Go Forward"
+            disabled={!hasNext}
+            onClick={handleClickLast}
+          >
+            <ChevronsRight />
+          </Button>
+        </ButtonGroup>
       </ButtonGroup>
-    </ButtonGroup>
+      <LevelUpModal
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        earnedExp={currentLecture ? currentLecture.exp : 0}
+        currentTotalExp={currentUser ? currentUser.exp : 0}
+      />
+    </>
   );
 }

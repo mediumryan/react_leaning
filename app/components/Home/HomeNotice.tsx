@@ -1,19 +1,19 @@
 // react
-import { useState } from 'react';
+import { useState } from "react";
 // atoms
-import { useAtom, useAtomValue } from 'jotai';
-import { currentUserAtom } from '~/data/userData';
-import { noticeAtom, type Notice } from '~/data/noticeData';
+import { useAtom, useAtomValue } from "jotai";
+import { currentUserAtom } from "~/data/userData";
+import { noticeAtom, type Notice } from "~/data/noticeData";
 // shadcn/ui
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { ScrollArea } from '../ui/scroll-area';
-import { Badge } from '../ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { ScrollArea } from "../ui/scroll-area";
+import { Badge } from "../ui/badge";
 // components
-import HomeNoticeDetail from './HomeNoticeDetail';
-import HomeNoticeDialog from './HomeNoticeDialog';
-import { BackgroundSpinner } from '../BackgroundSpinner';
+import HomeNoticeDetail from "./HomeNoticeDetail";
+import HomeNoticeDialog from "./HomeNoticeDialog";
+import { BackgroundSpinner } from "../Common/BackgroundSpinner";
 // i18n
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 
 export default function HomeNotice() {
   const { t } = useTranslation();
@@ -34,8 +34,8 @@ export default function HomeNotice() {
           <CardTitle>Notice</CardTitle>
 
           {/* 공지 추가 모달 - 관리자 및 강사만 접근 가능 */}
-          {(currentUser?.authority === 'admin' ||
-            currentUser?.authority === 'instructor') && (
+          {(currentUser?.authority === "admin" ||
+            currentUser?.authority === "instructor") && (
             <HomeNoticeDialog
               open={open}
               setOpen={setOpen}
@@ -59,7 +59,7 @@ export default function HomeNotice() {
                   <div className="flex items-center gap-2">
                     {notice.isImportant && (
                       <Badge variant="destructive">
-                        {t('notice.notice_important')}
+                        {t("notice.notice_important")}
                       </Badge>
                     )}
                     {notice.isNew && <Badge variant="secondary">NEW</Badge>}
@@ -74,7 +74,7 @@ export default function HomeNotice() {
 
               {notices?.length === 0 && (
                 <div className="text-sm text-muted-foreground text-center py-10">
-                  {t('notice.notice_empty')}
+                  {t("notice.notice_empty")}
                 </div>
               )}
             </div>

@@ -3,6 +3,7 @@ import type { PostType } from "~/data/postData";
 // shadcn/ui
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { CommunityPostFooter } from "./CommunityPostFooter";
+import { useTranslation } from "react-i18next";
 
 interface CommunityPostProps {
   posts: PostType[];
@@ -21,6 +22,8 @@ export const CommunityPost = ({
   setShowForm,
   isNewPost,
 }: CommunityPostProps) => {
+  const { t } = useTranslation();
+
   return (
     <>
       {posts.map((post) => (
@@ -42,9 +45,9 @@ export const CommunityPost = ({
               <a
                 href={post.projectLink}
                 target="_blank"
-                className="text-sm text-blue-600 underline"
+                className="text-sm text-blue-600 underline font-bold italic"
               >
-                プロジェクトリンク
+                {t("community.community_post_link")}
               </a>
             )}
 

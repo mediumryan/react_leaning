@@ -1,6 +1,9 @@
+// react
+import { useState } from "react";
 // atoms
 import { useAtom } from "jotai";
 import type { MultipleChoiceQuiz, ShortAnswerQuiz } from "~/data/contentData";
+import { currentUserAtom } from "~/data/userData";
 import {
   displayedCorrectAnswerAtom,
   isCorrectAtom,
@@ -19,19 +22,19 @@ import {
 } from "../ui/field";
 import { Input } from "../ui/input";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
+// components
+import { LevelUpModal } from "./LevelUpModal";
 // helpers
 import { cn } from "~/lib/utils";
 import { checkShortAnswer } from "~/helper/helper";
+// firebase
+import { completeLectureForUser } from "~/lib/firestore_utils";
 
 interface ContentQuizProps {
   quiz: MultipleChoiceQuiz | ShortAnswerQuiz;
-  onQuizComplete?: (contentId: string) => void; // Add this prop
 }
 
-export default function ContentQuiz({
-  quiz,
-  onQuizComplete,
-}: ContentQuizProps) {
+export default function ContentQuiz({ quiz }: ContentQuizProps) {
   const [userAnswer, setUserAnswer] = useAtom(userAnswersAtom);
   const [isSubmitted, setIsSubmitted] = useAtom(isSubmittedAtom);
   const [isCorrect, setIsCorrect] = useAtom(isCorrectAtom);
@@ -40,34 +43,53 @@ export default function ContentQuiz({
     displayedCorrectAnswerAtom,
   );
 
+  const [currentUser, setCurrentUser] = useAtom(currentUserAtom);
+
+  const [isOpen, setIsOpen] = useState(false);
+
   const handleAnswerChange = (value: string) => {
     if (!isSubmitted) {
       setUserAnswer(value);
     }
   };
 
-  const handleSubmit = () => {
-    setIsSubmitted(true);
-    setShowFeedback(true);
+  const handleSubmit = async () => {
+    try {
+      setIsSubmitted(true);
+      setShowFeedback(true);
 
-    let correct = false;
-    if (quiz.type === 1) {
-      // MultipleChoiceQuiz
-      const selectedIndex = quiz.options.findIndex(
-        (option) => option === userAnswer,
-      );
-      correct = selectedIndex === quiz.correctAnswerIndex;
-    } else if (quiz.type === 2) {
-      // ShortAnswerQuiz
-      const { isCorrect: shortAnswerCorrect, firstCorrectAnswer } =
-        checkShortAnswer(quiz.correctAnswer, userAnswer);
-      correct = shortAnswerCorrect;
-      setDisplayedCorrectAnswer(firstCorrectAnswer);
-    }
-    setIsCorrect(correct);
+      let correct = false;
+      if (quiz.type === 1) {
+        // MultipleChoiceQuiz
+        const selectedIndex = quiz.options.findIndex(
+          (option) => option === userAnswer,
+        );
+        correct = selectedIndex === quiz.correctAnswerIndex;
+      } else if (quiz.type === 2) {
+        // ShortAnswerQuiz
+        const { isCorrect: shortAnswerCorrect, firstCorrectAnswer } =
+          checkShortAnswer(quiz.correctAnswer, userAnswer);
+        correct = shortAnswerCorrect;
+        setDisplayedCorrectAnswer(firstCorrectAnswer);
+      }
+      setIsCorrect(correct);
 
-    if (correct && onQuizComplete) {
-      onQuizComplete(quiz.id);
+      if (correct) {
+        if (
+          currentUser?.contentStatus &&
+          currentUser.contentStatus.has(quiz.id)
+        ) {
+          return;
+        } else {
+          const updatedUser = await completeLectureForUser(currentUser, quiz);
+          if (updatedUser) {
+            setCurrentUser(updatedUser);
+          }
+          setIsOpen(true);
+        }
+      }
+    } catch (error) {
+      console.error("Error submitting quiz:", error);
     }
   };
 
@@ -169,6 +191,12 @@ export default function ContentQuiz({
       >
         {isSubmitted && !isCorrect ? "再試行" : "提出"}
       </Button>
+      <LevelUpModal
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        earnedExp={quiz ? quiz.exp : 0}
+        currentTotalExp={currentUser ? currentUser.exp : 0}
+      />
     </div>
   );
 }

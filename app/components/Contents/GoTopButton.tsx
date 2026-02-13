@@ -1,7 +1,11 @@
+// react
 import { useEffect } from "react";
-import { Button } from "./ui/button";
-import { ArrowUp } from "lucide-react";
+// react-router
 import { useParams } from "react-router";
+// shadcn/ui
+import { Button } from "~/components/ui/button";
+// icons
+import { ArrowUp } from "lucide-react";
 
 export default function GoTopButton() {
   const lectureId = useParams().id;

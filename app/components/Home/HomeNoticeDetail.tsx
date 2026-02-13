@@ -1,8 +1,8 @@
 // atoms
-import { useAtomValue, useSetAtom } from 'jotai';
-import { currentUserAtom } from '~/data/userData';
-import { type Notice } from '~/data/noticeData';
-import { refetchAtom } from '~/data/commonData';
+import { useAtomValue, useSetAtom } from "jotai";
+import { currentUserAtom } from "~/data/userData";
+import { type Notice } from "~/data/noticeData";
+import { refetchAtom } from "~/data/commonData";
 // shadcn/ui
 import {
   Dialog,
@@ -10,17 +10,18 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from '../ui/dialog';
-import { Button } from '../ui/button';
+} from "../ui/dialog";
+import { toast } from "sonner";
+import { Button } from "../ui/button";
 // icons
-import { Trash2 } from 'lucide-react';
+import { Trash2 } from "lucide-react";
+// components
+import HomeNoticeDialog from "./HomeNoticeDialog";
+import { CommonAlert } from "../Common/ConfirmDialog";
 // helpers
-import { deleteNotice } from '~/lib/firestore_utils';
+import { deleteNotice } from "~/lib/firestore_utils";
 // i18n
-import { useTranslation } from 'react-i18next';
-import { CommonAlert } from '../ConfirmDialog';
-import { toast } from 'sonner';
-import HomeNoticeDialog from './HomeNoticeDialog';
+import { useTranslation } from "react-i18next";
 
 interface HomeNoticeDetailProps {
   selectedNotice: Notice | null;
@@ -45,12 +46,12 @@ export default function HomeNoticeDetail({
 
     try {
       await deleteNotice(selectedNotice.id);
-      toast.success(t('notice.notice_delete_success'));
+      toast.success(t("notice.notice_delete_success"));
 
       setSelectedNotice(null);
       setRefetch((prev) => prev + 1);
     } catch (e) {
-      toast.error(t('notice.notice_delete_fail'));
+      toast.error(t("notice.notice_delete_fail"));
       console.error(e);
       return;
     }
@@ -77,8 +78,8 @@ export default function HomeNoticeDetail({
             </div>
 
             {/* 관리자 / 강사 전용 액션 */}
-            {(currentUser?.authority === 'admin' ||
-              currentUser?.authority === 'instructor') && (
+            {(currentUser?.authority === "admin" ||
+              currentUser?.authority === "instructor") && (
               <DialogFooter className="flex justify-end gap-2">
                 <HomeNoticeDialog
                   open={open}
@@ -94,16 +95,16 @@ export default function HomeNoticeDetail({
                   buttonLabel={
                     <>
                       <Trash2 className="w-4 h-4 mr-1" />
-                      {t('common.delete')}
+                      {t("common.delete")}
                     </>
                   }
                   triggerVariant="destructive"
                   triggerDisabled={false}
                   triggerSize="sm"
-                  title={t('notice.notice_delete_confirm')}
+                  title={t("notice.notice_delete_confirm")}
                   titleWithIcon="warning"
-                  cancleButtonLabel={t('common.cancel')}
-                  confirmButtonLabel={t('common.delete')}
+                  cancleButtonLabel={t("common.cancel")}
+                  confirmButtonLabel={t("common.delete")}
                   onConfirm={handleDeleteNotice}
                 />
               </DialogFooter>

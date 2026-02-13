@@ -1,5 +1,5 @@
 // shadcn/ui
-import type React from 'react';
+import type React from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,24 +10,24 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from './ui/alert-dialog';
-import { Button } from './ui/button';
+} from "~/components/ui/alert-dialog";
+import { Button } from "~/components/ui/button";
 // icons
-import { Ban, Info, TriangleAlert } from 'lucide-react';
+import { Ban, Info, TriangleAlert } from "lucide-react";
 
 interface CommonAlertProps {
   buttonLabel?: React.ReactNode;
   triggerVariant?:
-    | 'default'
-    | 'outline'
-    | 'ghost'
-    | 'link'
-    | 'secondary'
-    | 'destructive';
-  triggerSize?: 'default' | 'sm' | 'lg' | 'icon';
+    | "default"
+    | "outline"
+    | "ghost"
+    | "link"
+    | "secondary"
+    | "destructive";
+  triggerSize?: "default" | "sm" | "lg" | "icon";
   triggerDisabled?: boolean;
   title?: string;
-  titleWithIcon?: 'default' | 'info' | 'warning' | 'error';
+  titleWithIcon?: "default" | "info" | "warning" | "error";
   description?: string;
   cancleButtonLabel?: string;
   confirmButtonLabel?: string;
@@ -35,16 +35,16 @@ interface CommonAlertProps {
 }
 
 export function CommonAlert({
-  buttonLabel = '',
-  triggerVariant = 'default',
+  buttonLabel = "",
+  triggerVariant = "default",
   triggerDisabled = false,
-  title = '',
-  titleWithIcon = 'default',
-  description = '',
-  cancleButtonLabel = 'Cancel',
-  confirmButtonLabel = 'Continue',
+  title = "",
+  titleWithIcon = "default",
+  description = "",
+  cancleButtonLabel = "Cancel",
+  confirmButtonLabel = "Continue",
   onConfirm,
-  triggerSize = 'default',
+  triggerSize = "default",
 }: CommonAlertProps) {
   return (
     <AlertDialog>
@@ -60,11 +60,11 @@ export function CommonAlert({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            {titleWithIcon === 'info' ? (
+            {titleWithIcon === "info" ? (
               <Info className="inline mr-2 mb-1 text-blue-500" />
-            ) : titleWithIcon === 'warning' ? (
+            ) : titleWithIcon === "warning" ? (
               <TriangleAlert className="inline mr-2 mb-1 text-yellow-500" />
-            ) : titleWithIcon === 'error' ? (
+            ) : titleWithIcon === "error" ? (
               <Ban className="inline mr-2 mb-1 text-red-500" />
             ) : null}
             {title}

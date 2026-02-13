@@ -7,11 +7,13 @@ import type { PostType } from "~/data/postData";
 // icons
 import { HeartIcon } from "lucide-react";
 // shadcn/ui
-import { Button } from "../ui/button";
-import { Badge } from "../ui/badge";
-import { CardFooter } from "../ui/card";
+import { Button } from "~/components/ui/button";
+import { Badge } from "~/components/ui/badge";
+import { CardFooter } from "~/components/ui/card";
 // components
-import { CommonAlert } from "../ConfirmDialog";
+import { CommonAlert } from "../Common/ConfirmDialog";
+// i18n
+import { useTranslation } from "react-i18next";
 
 interface CommunityPostFooterProps {
   post: PostType;
@@ -30,6 +32,8 @@ export const CommunityPostFooter = ({
   handleDelete,
   isNewPost,
 }: CommunityPostFooterProps) => {
+  const { t } = useTranslation();
+
   const currentUser = useAtomValue(currentUserAtom);
 
   const [isHeartAnimating, setIsHeartAnimating] = useState(false);
@@ -68,17 +72,17 @@ export const CommunityPostFooter = ({
                 setShowForm(true);
               }}
             >
-              修正
+              {t("common.edit")}
             </Button>
             <CommonAlert
-              buttonLabel="削除"
+              buttonLabel={t("common.delete")}
               triggerVariant="destructive"
               triggerDisabled={false}
               triggerSize="sm"
-              title="投稿を削除しますか？"
+              title={t("community.community_post_delete_confirm")}
               titleWithIcon="warning"
-              cancleButtonLabel="いいえ"
-              confirmButtonLabel="削除"
+              cancleButtonLabel={t("common.cancel")}
+              confirmButtonLabel={t("common.delete")}
               onConfirm={() => handleDelete(post)}
             />
           </div>

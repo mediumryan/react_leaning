@@ -1,4 +1,11 @@
-import { Plus, Search, UserCog, Trash2 } from "lucide-react";
+// react
+import { useEffect, useState } from "react";
+// react-router
+import { Navigate } from "react-router";
+// atoms
+import { currentUserAtom, usersAtom, type User } from "~/data/userData";
+import { useAtom, useAtomValue } from "jotai";
+// shadcn/ui
 import { Input } from "~/components/ui/input";
 import { Dialog, DialogTrigger } from "~/components/ui/dialog";
 import { Button } from "~/components/ui/button";
@@ -11,25 +18,29 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import { Badge } from "~/components/ui/badge";
-import { useEffect, useState } from "react"; // Import useEffect
-import { currentUserAtom, usersAtom, type User } from "~/data/userData";
-import UserForm from "~/components/UserForm";
-import { useAtom, useAtomValue } from "jotai";
-import { Navigate } from "react-router";
+import { toast } from "sonner";
+// components
+import UserForm from "~/components/Users/UserForm";
+import { BackgroundSpinner } from "~/components/Common/BackgroundSpinner";
+// icons
+import { Search, UserCog, Trash2 } from "lucide-react";
+// firebase
 import {
   getAllUsers,
-  addUserToFirestore,
   updateUserInFirestore,
   deleteUserFromFirestore,
-} from "~/lib/firestore_utils"; // Import CUD functions
+} from "~/lib/firestore_utils";
+// i18n
+import { useTranslation } from "react-i18next";
 
 export default function UserManagementPage() {
+  const { t } = useTranslation();
+
   const [openAdd, setOpenAdd] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [isLoading, setIsLoading] = useState(true); // Loading state for initial fetch
   const [error, setError] = useState<string | null>(null); // Error state for initial fetch
 
-  const currentUser = useAtomValue(currentUserAtom);
   const [users, setUsers] = useAtom(usersAtom); // Standard atom usage
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [search, setSearch] = useState("");
@@ -44,7 +55,7 @@ export default function UserManagementPage() {
         setUsers(fetchedUsers);
       } catch (err: any) {
         console.error("Failed to fetch users:", err);
-        setError("사용자 정보를 불러오는데 실패했습니다.");
+        setError(t("users.users_fetch_error"));
         setUsers(null); // Clear users on error
       } finally {
         setIsLoading(false);
@@ -61,7 +72,7 @@ export default function UserManagementPage() {
   );
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm("本当にこのユーザーを削除しますか？")) return;
+    if (!window.confirm(t("users.users_delete_confirm"))) return;
 
     const prevUsers = users; // Store current state for potential rollback
 
@@ -72,46 +83,52 @@ export default function UserManagementPage() {
 
     try {
       await deleteUserFromFirestore(id);
-      alert("ユーザーが正常に削除されました。");
+      toast.success(t("users.users_delete_success"));
     } catch (err: any) {
-      console.error("ユーザー削除に失敗しました:", err);
-      setError("ユーザー削除に失敗しました。");
+      toast.error(t("users.users_delete_fail"));
+      setError(t("users.users_delete_fail"));
       setUsers(prevUsers); // Rollback optimistic update
     }
   };
 
+  const [currentUser, setCurrentUser] = useAtom(currentUserAtom);
+
   const handleSave = async (user: User) => {
     const isNewUser = !users?.some((u) => u.uid === user.uid);
-    const prevUsers = users; // Store current state for potential rollback
+    const prevUsers = users;
 
-    // Optimistic UI update
+    // Optimistic UI update (리스트 갱신)
     setUsers((currentUsers) => {
-      if (!currentUsers) return [user]; // If no users, add this one
+      if (!currentUsers) return [user];
       const existingIndex = currentUsers.findIndex((u) => u.uid === user.uid);
       if (existingIndex !== -1) {
-        // Update existing user
         const updated = [...currentUsers];
         updated[existingIndex] = user;
         return updated;
       } else {
-        // Add new user
         return [...currentUsers, user];
       }
     });
 
+    if (user.uid === currentUser?.uid) {
+      setCurrentUser(user);
+    }
+
     try {
       if (isNewUser) {
-        await addUserToFirestore(user);
-        alert("ユーザーが正常に追加されました。");
+        // await addUserToFirestore(user);
       } else {
-        // For updates, send the UID and fields to update
         await updateUserInFirestore(user.uid, user);
-        alert("ユーザー情報が正常に更新されました。");
+        toast.success(t("users.users_edit_success"));
       }
     } catch (err: any) {
-      console.error("ユーザー情報の保存に失敗しました:", err);
-      setError("ユーザー情報の保存に失敗しました。");
-      setUsers(prevUsers); // Rollback optimistic update
+      toast.error(t("users.users_save_fail"));
+      setUsers(prevUsers);
+
+      // 에러 발생 시 currentUser도 롤백 (선택 사항)
+      if (user.uid === currentUser?.uid) {
+        setCurrentUser(currentUser);
+      }
     } finally {
       setOpenAdd(false);
       setOpenEdit(false);
@@ -130,17 +147,13 @@ export default function UserManagementPage() {
   }
 
   if (isLoading) {
-    return (
-      <div className="p-6 max-w-7xl mx-auto text-center text-lg">
-        ユーザー情報を読み込み中...
-      </div>
-    );
+    return <BackgroundSpinner />;
   }
 
   if (error) {
     return (
       <div className="p-6 max-w-7xl mx-auto text-center text-red-500 text-lg">
-        エラー: {error}
+        ERROR: {error}
       </div>
     );
   }
@@ -149,7 +162,7 @@ export default function UserManagementPage() {
   if (!users) {
     return (
       <div className="p-6 max-w-7xl mx-auto text-center text-lg">
-        ユーザー情報が存在しません。
+        {t("users.users_no_results")}
       </div>
     );
   }
@@ -157,13 +170,13 @@ export default function UserManagementPage() {
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-bold">ユーザー管理</h1>
+        <h1 className="text-2xl font-bold">{t("users.users_title")}</h1>
 
         <div className="flex gap-2 w-full sm:w-auto">
           <div className="relative flex-1 sm:w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search by name, nickname, email..."
+              placeholder={t("users.users_search_placeholder")}
               className="pl-9"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -171,11 +184,11 @@ export default function UserManagementPage() {
           </div>
 
           <Dialog open={openAdd} onOpenChange={setOpenAdd}>
-            <DialogTrigger asChild>
+            {/* <DialogTrigger asChild>
               <Button>
                 <Plus className="h-4 w-4 mr-2" /> ユーザーを追加
               </Button>
-            </DialogTrigger>
+            </DialogTrigger> */}
             <UserForm onSave={handleSave} />
           </Dialog>
         </div>
@@ -185,14 +198,14 @@ export default function UserManagementPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Nickname</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Course</TableHead>
-              <TableHead>Grade</TableHead>
-              <TableHead>Authority</TableHead>
-              <TableHead>EXP</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>{t("users.users_name_label")}</TableHead>
+              <TableHead>{t("users.users_nickname_label")}</TableHead>
+              <TableHead>{t("users.users_email_label")}</TableHead>
+              <TableHead>{t("users.users_course_label")}</TableHead>
+              <TableHead>{t("users.users_grade_label")}</TableHead>
+              <TableHead>{t("users.users_authority_label")}</TableHead>
+              <TableHead>{t("users.users_exp_label")}</TableHead>
+              <TableHead className="text-right"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

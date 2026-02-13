@@ -1,7 +1,7 @@
-import { useTranslation } from 'react-i18next';
-import { Button } from './ui/button';
-import { useSetAtom } from 'jotai';
-import { languageAtom } from '~/data/contentData';
+import { useTranslation } from "react-i18next";
+import { Button } from "~/components/ui/button";
+import { useSetAtom } from "jotai";
+import { languageAtom } from "~/data/contentData";
 
 export function LanguageSwitcher() {
   const { i18n } = useTranslation();
@@ -20,14 +20,16 @@ export function LanguageSwitcher() {
   return (
     <div className="flex space-x-2 items-center justify-center">
       <Button
-        onClick={() => toggleLanguage('ko')}
-        className={currentLanguage === 'ko' ? 'font-bold text-blue-500' : ''}
+        variant="outline"
+        onClick={() => toggleLanguage("ko")}
+        className={`${currentLanguage === "ko" ? "font-bold text-blue-500" : ""}`}
       >
         한국어
       </Button>
       <Button
-        onClick={() => toggleLanguage('ja')}
-        className={currentLanguage === 'ja' ? 'font-bold text-blue-500' : ''}
+        variant="outline"
+        onClick={() => toggleLanguage("ja")}
+        className={`${currentLanguage === "ja" ? "font-bold text-blue-500" : ""}`}
       >
         日本語
       </Button>

@@ -5,6 +5,8 @@ import { Button } from "~/components/ui/button";
 import { ButtonGroup } from "~/components/ui/button-group";
 // icons
 import { PlusIcon } from "lucide-react";
+// i18n
+import { useTranslation } from "react-i18next";
 
 interface CommunityHeaderProps {
   postOrder: "new" | "popular";
@@ -19,6 +21,8 @@ export const CommunityHeader = ({
   setEditingPost,
   setShowForm,
 }: CommunityHeaderProps) => {
+  const { t } = useTranslation();
+
   return (
     <div className="flex justify-between items-center">
       <ButtonGroup className="gap-0.5">
@@ -26,13 +30,13 @@ export const CommunityHeader = ({
           onClick={() => setPostOrder("new")}
           variant={postOrder === "new" ? "default" : "secondary"}
         >
-          最新
+          {t("community.community_button_new")}
         </Button>
         <Button
           onClick={() => setPostOrder("popular")}
           variant={postOrder === "popular" ? "default" : "secondary"}
         >
-          人気
+          {t("community.community_button_popular")}
         </Button>
       </ButtonGroup>
       <Button
@@ -43,7 +47,7 @@ export const CommunityHeader = ({
         }}
       >
         <PlusIcon className="w-4 h-4" />
-        ポスト作成
+        {t("community.community_button_add_post")}
       </Button>
     </div>
   );

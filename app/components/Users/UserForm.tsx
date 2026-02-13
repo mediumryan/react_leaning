@@ -1,15 +1,20 @@
+// react
 import { useState } from "react";
+// atoms
 import type { Authority, Course, Grade, User } from "~/data/userData";
+// shadcn/ui
 import {
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "./ui/dialog";
-import { Label } from "./ui/label";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
+} from "~/components/ui/dialog";
+import { Label } from "~/components/ui/label";
+import { Input } from "~/components/ui/input";
+import { Button } from "~/components/ui/button";
+// i18n
+import { useTranslation } from "react-i18next";
 
 interface UserFormProps {
   user?: User;
@@ -18,6 +23,8 @@ interface UserFormProps {
 }
 
 function UserForm({ user, onSave, setOpen }: UserFormProps) {
+  const { t } = useTranslation();
+
   const [name, setName] = useState(user?.name ?? "");
   const [nickname, setNickname] = useState(user?.nickname ?? "");
   const [email, setEmail] = useState(user?.email ?? "");
@@ -49,15 +56,13 @@ function UserForm({ user, onSave, setOpen }: UserFormProps) {
     <DialogContent className="sm:max-w-120">
       <form onSubmit={handleSubmit} className="space-y-4">
         <DialogHeader>
-          <DialogTitle>{user ? "Edit User" : "Add User"}</DialogTitle>
-          <DialogDescription>
-            {user ? "Update user information." : "Create a new user account."}
-          </DialogDescription>
+          <DialogTitle>{user ? t("users.users_edit_title") : ""}</DialogTitle>
+          <DialogDescription></DialogDescription>
         </DialogHeader>
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
+            <Label htmlFor="name">{t("users.users_name_label")}</Label>
             <Input
               id="name"
               value={name}
@@ -67,7 +72,7 @@ function UserForm({ user, onSave, setOpen }: UserFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="nickname">Nickname</Label>
+            <Label htmlFor="nickname">{t("users.users_nickname_label")}</Label>
             <Input
               id="nickname"
               value={nickname}
@@ -78,7 +83,7 @@ function UserForm({ user, onSave, setOpen }: UserFormProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">{t("users.users_email_label")}</Label>
           <Input
             id="email"
             type="email"
@@ -89,7 +94,7 @@ function UserForm({ user, onSave, setOpen }: UserFormProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="course">Course</Label>
+          <Label htmlFor="course">{t("users.users_course_label")}</Label>
           <select
             id="course"
             className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm"
@@ -104,7 +109,7 @@ function UserForm({ user, onSave, setOpen }: UserFormProps) {
 
         <div className="grid grid-cols-3 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="grade">Grade</Label>
+            <Label htmlFor="grade">{t("users.users_grade_label")}</Label>
             <select
               id="grade"
               className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm"
@@ -120,7 +125,9 @@ function UserForm({ user, onSave, setOpen }: UserFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="authority">Authority</Label>
+            <Label htmlFor="authority">
+              {t("users.users_authority_label")}
+            </Label>
             <select
               id="authority"
               className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm"
@@ -134,7 +141,7 @@ function UserForm({ user, onSave, setOpen }: UserFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="exp">EXP</Label>
+            <Label htmlFor="exp">{t("users.users_exp_label")}</Label>
             <Input
               id="exp"
               type="number"
@@ -147,7 +154,7 @@ function UserForm({ user, onSave, setOpen }: UserFormProps) {
         </div>
 
         <DialogFooter>
-          <Button type="submit">Save</Button>
+          <Button type="submit">{t("common.save")}</Button>
         </DialogFooter>
       </form>
     </DialogContent>

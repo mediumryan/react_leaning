@@ -18,6 +18,8 @@ import { validateImageFile } from "~/helper/helper";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { storage } from "~/lib/firebase";
 import { toast } from "sonner";
+// i18n
+import { useTranslation } from "react-i18next";
 
 interface PostFormProps {
   editPost: PostType | null;
@@ -38,6 +40,8 @@ export const CommunityPostForm = ({
   onClose,
   onSave,
 }: PostFormProps) => {
+  const { t } = useTranslation();
+
   const [title, setTitle] = useState(editPost?.title || "");
   const [content, setContent] = useState(editPost?.content || "");
   const [projectLink, setProjectLink] = useState(editPost?.projectLink || "");
@@ -47,7 +51,7 @@ export const CommunityPostForm = ({
 
   const handleSave = async () => {
     if (!title.trim()) {
-      toast.error("タイトルを入力してください。");
+      toast.error(t("community.community_post_add_title_required"));
       return;
     }
 
@@ -98,11 +102,11 @@ export const CommunityPostForm = ({
       {/* 제목 */}
       <div className="space-y-1">
         <Label htmlFor="title" className={POST_FORM_TITLE_STYLE}>
-          タイトル
+          {t("community.community_post_add_title_label")}
         </Label>
         <Input
           id="title"
-          placeholder="タイトルを入力してください"
+          placeholder={t("community.community_post_add_title_placeholder")}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
@@ -111,11 +115,11 @@ export const CommunityPostForm = ({
       {/* 내용 */}
       <div className="space-y-1">
         <Label htmlFor="content" className={POST_FORM_TITLE_STYLE}>
-          内容
+          {t("community.community_post_add_content_label")}
         </Label>
         <Textarea
           id="content"
-          placeholder="内容を入力してください"
+          placeholder={t("community.community_post_add_content_placeholder")}
           value={content}
           onChange={(e) => setContent(e.target.value)}
           rows={4}
@@ -125,11 +129,11 @@ export const CommunityPostForm = ({
       {/* 프로젝트 링크 */}
       <div className="space-y-1">
         <Label htmlFor="projectLink" className={POST_FORM_TITLE_STYLE}>
-          プロジェクトリンク
+          {t("community.community_post_add_link_label")}
         </Label>
         <Input
           id="projectLink"
-          placeholder="https://"
+          placeholder="https://example.com"
           value={projectLink}
           onChange={(e) => setProjectLink(e.target.value)}
         />
@@ -137,7 +141,7 @@ export const CommunityPostForm = ({
 
       <div className="space-y-2">
         <Label htmlFor="image" className={POST_FORM_TITLE_STYLE}>
-          プレビューイメージ
+          {t("community.community_post_add_preview_label")}
         </Label>
 
         <Input
@@ -149,9 +153,12 @@ export const CommunityPostForm = ({
 
         {/* helper text */}
         <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-          <span>アップロード制限:</span>
+          <span>{t("community.community_post_add_upload_limit_label")}:</span>
 
-          <Badge variant="secondary">{MAX_IMAGE_SIZE_MB}MB 以下</Badge>
+          <Badge variant="secondary">
+            {MAX_IMAGE_SIZE_MB}MB{" "}
+            {t("community.community_post_add_upload_limit_mb")}
+          </Badge>
 
           {ALLOWED_IMAGE_TYPES.map((type) => (
             <Badge key={type} variant="outline">
@@ -164,9 +171,11 @@ export const CommunityPostForm = ({
       {/* 버튼 영역 */}
       <div className="flex justify-end gap-2 pt-2">
         <Button variant="outline" onClick={onClose}>
-          キャンセル
+          {t("common.cancel")}
         </Button>
-        <Button onClick={handleSave}>{editPost ? "修正" : "保存"}</Button>
+        <Button onClick={handleSave}>
+          {editPost ? t("common.edit") : t("common.upload")}
+        </Button>
       </div>
     </div>
   );

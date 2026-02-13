@@ -14,7 +14,7 @@ export type User = {
 
 export type Authority = "admin" | "instructor" | "user";
 
-export type Grade = "Bronze" | "Silver" | "Gold" | "Platinum";
+export type Grade = "Bronze" | "Silver" | "Gold" | "Platinum" | "Diamond";
 
 export type Course = "Beginner" | "Intermediate" | "Advanced";
 

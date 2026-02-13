@@ -15,10 +15,9 @@ import remarkGfm from "remark-gfm";
 
 interface ContentsProps {
   lectureId: string | undefined;
-  onQuizComplete?: (contentId: string) => void; // Add this prop
 }
 
-export default function Contents({ lectureId, onQuizComplete }: ContentsProps) {
+export default function Contents({ lectureId }: ContentsProps) {
   const contents = useAtomValue(contentsAtom);
 
   const currentContent = useMemo(() => {
@@ -37,6 +36,21 @@ export default function Contents({ lectureId, onQuizComplete }: ContentsProps) {
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
             components={{
+              strong({ children, ...props }) {
+                return (
+                  <strong
+                    className="font-extrabold text-gray-900 mx-0.5"
+                    {...props}
+                  >
+                    {children}
+                  </strong>
+                );
+              },
+              p({ children }) {
+                return (
+                  <p className="leading-7 whitespace-pre-wrap">{children}</p>
+                );
+              },
               h1({ children, ...props }) {
                 return (
                   <h1
@@ -92,12 +106,19 @@ export default function Contents({ lectureId, onQuizComplete }: ContentsProps) {
                   </blockquote>
                 );
               },
-              img({ ...props }) {
+              img({ node, ...props }) {
                 return (
                   <img
-                    style={{ maxWidth: "40vw" }}
-                    src={props.src?.replace("../../../../public/", "/")}
-                    alt="MarkdownRenderer__Image"
+                    {...props}
+                    className="rounded-lg shadow-md my-6"
+                    style={{
+                      maxWidth: "100%",
+                      height: "auto",
+                      display: "block",
+                      margin: "1.5rem auto",
+                    }}
+                    alt={props.alt || "content-image"}
+                    src={props.src}
                   />
                 );
               },
@@ -110,15 +131,13 @@ export default function Contents({ lectureId, onQuizComplete }: ContentsProps) {
               },
             }}
           >
-            {currentContent.content.replace(/\n/gi, "\n\n")}
+            {currentContent.content}
           </ReactMarkdown>
         );
       case 1:
       case 2:
         // Multiple Choice or Short Answer Quiz
-        return (
-          <ContentQuiz quiz={currentContent} onQuizComplete={onQuizComplete} />
-        );
+        return <ContentQuiz quiz={currentContent} />;
       default:
         return <p>Unknown content type.</p>;
     }
