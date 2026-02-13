@@ -2,12 +2,13 @@
   "name": "react-learning",
   "private": true,
   "type": "module",
-  "homepage": "http://mediumryan.github.io/react_leaning/",
   "scripts": {
     "build": "vite build",
     "dev": "react-router dev",
     "start": "react-router-serve ./build/server/index.js",
-    "typecheck": "react-router typegen && tsc"
+    "typecheck": "react-router typegen && tsc",
+    "deploy": "gh-pages -d build/client",
+    "predeploy": "npm run build"
   },
   "dependencies": {
     "-": "^0.0.1",

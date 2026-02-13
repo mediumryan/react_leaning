@@ -4,5 +4,6 @@ import { defineConfig } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig(({ mode }) => ({
+  base: '/react_learning/',
   plugins: [tailwindcss(), reactRouter(), tsconfigPaths()],
 }));
