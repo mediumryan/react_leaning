@@ -1,0 +1,1 @@
+import{J as i,O as o,P as u,Q as a,R as l,T as c,b as n,e as d}from"./label-Ch00gP77.js";import{i as f}from"./firestore_utils-jdwOOrcn.js";const e=i(),m=(t,s)=>u(a,t,s),p=(t,s)=>o(a,t,s),A=()=>c(a);let r=!1;function P(){r||(r=!0,l(a,async t=>{if(t){const s=await f(t.uid);e.set(n,s)}else e.set(n,null);e.set(d,!1)}))}export{e as a,m as b,P as i,A as l,p as s};
